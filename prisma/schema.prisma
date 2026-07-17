@@ -1,0 +1,212 @@
+// 자리지킴이 — Prisma 스키마
+// DB.md (Draft v1.0) 2절 테이블 정의를 1:1로 옮긴 것. 컬럼 근거/설계 이유는 전부 DB.md 참고.
+//
+// 의도적 차이점 (DB.md 대비):
+// 1) PK/FK 타입을 BIGSERIAL 대신 Int(SERIAL)로 사용한다.
+//    - 이유: Prisma의 BigInt는 JS BigInt로 매핑되는데, Next.js API 라우트가 흔히 쓰는
+//      JSON.stringify가 BigInt를 직렬화하지 못해 런타임 에러가 난다. 310석·학생 프로젝트
+//      규모에서는 BIGSERIAL의 여유 범위가 필요 없으므로, JSON 직렬화 편의를 위해 Int로 낮췄다.
+// 2) DB.md 2.5/2.6/2.7절의 "부분 유니크 인덱스"(WHERE절 있는 unique index)는
+//    Prisma 스키마 DSL이 선언적으로 지원하지 않는다. 이 3개는 `prisma/partial_unique_indexes.sql`에
+//    원본 SQL로 남겨두고, `prisma db push`/마이그레이션 이후 반드시 별도 적용해야 한다.
+//    (F3 1인 1좌석, F13 좌석당 활성 신고 1건 같은 동시성 규칙이 여기 걸려있으므로 절대 생략 금지)
+//
+// 실제 DB: Supabase 프로젝트 "fin_team7" (ref: dwyqdibgnecymaehkzik, ap-northeast-2)에
+// 이 스키마 그대로 적용 완료(2026-07-17). Supabase 권장 방식대로 런타임 쿼리는 커넥션 풀러(6543),
+// 마이그레이션은 다이렉트 커넥션(5432)을 쓰도록 url/directUrl을 분리했다 — .env.example 참고.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// 2.1 users — 이용자 계정 (근거: PRD F1, 14.1)
+model User {
+  id           Int      @id @default(autoincrement())
+  studentId    String   @unique @map("student_id") @db.VarChar(20)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  seatSessions   SeatSession[]
+  reportsFiled   Report[]        @relation("ReporterUser")
+  notifications  Notification[]
+
+  @@map("users")
+}
+
+/// 2.2 zones — 구역 (근거: PRD 6.2)
+model Zone {
+  code        String  @id @db.VarChar(4)
+  name        String  @db.VarChar(50)
+  floor       Int     @db.SmallInt
+  colorRef    String  @map("color_ref") @db.VarChar(20)
+  description String?
+  seatCount   Int     @map("seat_count") @db.SmallInt
+
+  seats Seat[]
+
+  @@map("zones")
+}
+
+/// 2.3 seats — 좌석 (근거: PRD 6.2/6.3/7.1, DB.md 14.3)
+model Seat {
+  id              Int        @id @default(autoincrement())
+  seatCode        String     @unique @map("seat_code") @db.VarChar(20)
+  zoneCode        String     @map("zone_code") @db.VarChar(4)
+  /// GS 전용(01~10). 그 외 구역은 null. 예약 단위가 아니라 조회 편의용 속성(14.3 확정).
+  roomNumber      Int?       @map("room_number") @db.SmallInt
+  hasOutlet       Boolean    @default(false) @map("has_outlet")
+  isWindow        Boolean    @default(false) @map("is_window")
+  /// 비정규화 캐시. 진실의 원천은 SeatSession(활성 세션 유무) — DB.md 4절 참고.
+  status          SeatStatus @default(AVAILABLE)
+  statusChangedAt DateTime   @default(now()) @map("status_changed_at")
+
+  zone         Zone          @relation(fields: [zoneCode], references: [code])
+  seatSessions SeatSession[]
+
+  @@index([zoneCode])
+  @@map("seats")
+}
+
+/// 2.4 away_categories — 자리비움 카테고리 코드 테이블 (근거: PRD F5, 10.1/10.2)
+model AwayCategory {
+  code         String  @id @db.VarChar(20)
+  label        String  @db.VarChar(30)
+  limitMinutes Int     @map("limit_minutes") @db.SmallInt
+  sortOrder    Int     @map("sort_order") @db.SmallInt
+  active       Boolean @default(true)
+
+  awayPeriods AwayPeriod[]
+
+  @@map("away_categories")
+}
+
+/// 2.5 seat_sessions — 체크인 세션 (근거: PRD F3/F4)
+/// 부분 유니크 인덱스 2개(활성 세션은 좌석당 1개, 이용자당 1개)는
+/// prisma/partial_unique_indexes.sql 로 별도 적용 — F3(1인 1좌석)를 DB 레벨에서 강제하는 핵심 제약.
+model SeatSession {
+  id             Int             @id @default(autoincrement())
+  seatId         Int             @map("seat_id")
+  userId         Int             @map("user_id")
+  checkedInAt    DateTime        @default(now()) @map("checked_in_at")
+  checkedOutAt   DateTime?       @map("checked_out_at")
+  checkoutReason CheckoutReason? @map("checkout_reason")
+
+  seat          Seat            @relation(fields: [seatId], references: [id])
+  user          User            @relation(fields: [userId], references: [id])
+  awayPeriods   AwayPeriod[]
+  reports       Report[]
+  notifications Notification[]
+
+  @@index([seatId])
+  @@index([userId])
+  @@map("seat_sessions")
+}
+
+/// 2.6 away_periods — 자리비움 기록 (근거: PRD F5~F8, 10.3/10.4)
+/// 부분 유니크 인덱스(세션당 활성 자리비움 1개)는 prisma/partial_unique_indexes.sql 참고.
+model AwayPeriod {
+  id            Int            @id @default(autoincrement())
+  seatSessionId Int            @map("seat_session_id")
+  categoryCode  String         @map("category_code") @db.VarChar(20)
+  /// 신청 시점 값 스냅샷 (카테고리 제한시간이 나중에 바뀌어도 과거 기록은 불변)
+  limitMinutes  Int            @map("limit_minutes") @db.SmallInt
+  startedAt     DateTime       @default(now()) @map("started_at")
+  endedAt       DateTime?      @map("ended_at")
+  endReason     AwayEndReason? @map("end_reason")
+  /// 20% 잔여 경고(10.3) 중복 발송 방지용
+  warningSentAt DateTime?      @map("warning_sent_at")
+
+  seatSession SeatSession  @relation(fields: [seatSessionId], references: [id])
+  category    AwayCategory @relation(fields: [categoryCode], references: [code])
+
+  @@index([seatSessionId])
+  @@map("away_periods")
+}
+
+/// 2.7 reports — 무단 점유 신고 (근거: PRD F9~F14)
+/// 부분 유니크 인덱스(세션당 활성 신고 1건, F13)는 prisma/partial_unique_indexes.sql 참고.
+model Report {
+  id               Int          @id @default(autoincrement())
+  seatSessionId    Int          @map("seat_session_id")
+  /// 민감 컬럼 — 어떤 조회 API/뷰에서도 일반 이용자에게 조인·노출 금지 (F14, DB.md 5절)
+  reporterUserId   Int?         @map("reporter_user_id")
+  reportedAt       DateTime     @default(now()) @map("reported_at")
+  countdownEndsAt  DateTime     @map("countdown_ends_at")
+  status           ReportStatus @default(ACTIVE)
+  resolvedAt       DateTime?    @map("resolved_at")
+  /// 20% 잔여 경고(10.3) 중복 발송 방지용
+  warningSentAt    DateTime?    @map("warning_sent_at")
+
+  seatSession   SeatSession     @relation(fields: [seatSessionId], references: [id])
+  reporterUser  User?           @relation("ReporterUser", fields: [reporterUserId], references: [id])
+  notifications Notification[]
+
+  @@index([seatSessionId])
+  @@map("reports")
+}
+
+/// 2.8 notifications — 알림 (근거: PRD F16, 14.7)
+model Notification {
+  id            Int              @id @default(autoincrement())
+  userId        Int              @map("user_id")
+  type          NotificationType
+  seatSessionId Int?             @map("seat_session_id")
+  reportId      Int?             @map("report_id")
+  /// 렌더링된 최종 문구. 상대방 식별정보 절대 포함 금지(F14) — 무엇을 넣을지는 서비스 레이어 책임.
+  message       String
+  createdAt     DateTime         @default(now()) @map("created_at")
+  readAt        DateTime?        @map("read_at")
+
+  user        User         @relation(fields: [userId], references: [id])
+  seatSession SeatSession? @relation(fields: [seatSessionId], references: [id])
+  report      Report?      @relation(fields: [reportId], references: [id])
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+/// 7.1 좌석 3대 상태
+enum SeatStatus {
+  AVAILABLE
+  EMPTY
+  OCCUPIED
+}
+
+enum CheckoutReason {
+  MANUAL
+  AWAY_EXPIRED
+  REPORT_EXPIRED
+}
+
+enum AwayEndReason {
+  RETURNED
+  AUTO_EXPIRED
+  /// 외출 중 본인이 그대로 체크아웃해버린 예외 케이스 (DB.md 2.6절)
+  SESSION_CHECKOUT
+}
+
+enum ReportStatus {
+  ACTIVE
+  CANCELLED_RETURN
+  AUTO_EXPIRED
+}
+
+/// F16 알림 유형 (DB.md 2.8절 표 그대로)
+enum NotificationType {
+  CHECKIN_COMPLETE
+  CHECKOUT_COMPLETE
+  AWAY_STARTED
+  AWAY_WARNING
+  AWAY_AUTO_EXPIRED
+  REPORT_RECEIVED
+  REPORT_WARNING
+  REPORT_AUTO_EXPIRED_OCCUPANT
+  REPORT_AUTO_EXPIRED_REPORTER
+  REPORT_CANCELLED
+}
