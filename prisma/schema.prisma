@@ -11,9 +11,10 @@
 //    원본 SQL로 남겨두고, `prisma db push`/마이그레이션 이후 반드시 별도 적용해야 한다.
 //    (F3 1인 1좌석, F13 좌석당 활성 신고 1건 같은 동시성 규칙이 여기 걸려있으므로 절대 생략 금지)
 //
-// 실제 DB: Supabase 프로젝트 "fin_team7" (ref: dwyqdibgnecymaehkzik, ap-northeast-2)에
-// 이 스키마 그대로 적용 완료(2026-07-17). Supabase 권장 방식대로 런타임 쿼리는 커넥션 풀러(6543),
-// 마이그레이션은 다이렉트 커넥션(5432)을 쓰도록 url/directUrl을 분리했다 — .env.example 참고.
+// 실제 DB: Supabase 프로젝트 "fin_team7" (ref: nigefilyramspwrmobyb, ap-northeast-2, 2026-07-17 재생성)에
+// 이 스키마 그대로 적용 완료. 이전 프로젝트(ref: dwyqdibgnecymaehkzik)는 폐기되었다.
+// Supabase 권장 방식대로 런타임 쿼리는 커넥션 풀러(6543), 마이그레이션은 다이렉트 커넥션(5432)을
+// 쓰도록 url/directUrl을 분리했다 — .env.example 참고.
 
 generator client {
   provider = "prisma-client-js"
