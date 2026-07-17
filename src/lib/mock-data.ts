@@ -20,13 +20,13 @@ interface ZoneMeta {
 
 /**
  * 2026-07-17 실제 2~5층 방 이름 기준(1차) → 2026-07-17(2차) 더 상세한 2F~5F.png 반영해 24개 구역으로 확장.
- * 실제 Supabase DB의 zones 테이블과 동일(DB.md 2.2절). seatCount는 전부 0 — 실제 좌석 수가
- * 아직 미정(TBD)이라 임의로 채우지 않았다. 실측 좌석 수가 확정되면 이 값과 아래
- * buildMockSeatsForZone의 length를 함께 갱신할 것.
+ * 실제 Supabase DB의 zones 테이블과 동일(DB.md 2.2절). F2F1(158석, 2F1A.jpg 실측), F2SQ(60석,
+ * 2Fmain.jpg 실측), F4F2(112석, 4F2A.jpg 실측)을 제외한 나머지는 아직 미정(TBD)이라 seatCount
+ * 0으로 둔다. 실측 좌석 수가 확정되면 이 값과 아래 buildMockSeatsForZone의 length를 함께 갱신할 것.
  */
 export const ZONE_META: ZoneMeta[] = [
-  { code: "F2F1", name: "제1자유열람실", floor: 2, seatCount: 0 },
-  { code: "F2SQ", name: "메인스퀘어", floor: 2, seatCount: 0 },
+  { code: "F2F1", name: "제1자유열람실", floor: 2, seatCount: 158 },
+  { code: "F2SQ", name: "메인스퀘어", floor: 2, seatCount: 60 },
   { code: "F2LB", name: "메인로비", floor: 2, seatCount: 0 },
   { code: "F2CF", name: "컨퍼런스룸", floor: 2, seatCount: 0 },
   { code: "F2MD", name: "미디어실", floor: 2, seatCount: 0 },
@@ -41,7 +41,7 @@ export const ZONE_META: ZoneMeta[] = [
   { code: "F3LN", name: "대출실", floor: 3, seatCount: 0 },
   { code: "F3MT", name: "회의실", floor: 3, seatCount: 0 },
   { code: "F3SC", name: "악보서가", floor: 3, seatCount: 0 },
-  { code: "F4F2", name: "제2자유열람실", floor: 4, seatCount: 0 },
+  { code: "F4F2", name: "제2자유열람실", floor: 4, seatCount: 112 },
   { code: "F4GR", name: "대학원 열람실", floor: 4, seatCount: 0 },
   { code: "F4CR", name: "1인 연구 캐럴", floor: 4, seatCount: 0 },
   { code: "F4FT", name: "미래인재양성센터", floor: 4, seatCount: 0 },
