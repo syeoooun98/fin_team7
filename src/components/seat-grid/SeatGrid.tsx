@@ -21,6 +21,8 @@ interface SeatGridProps {
   onReport: (seatId: number) => Promise<{ accepted: boolean; message: string }>;
   /** TODO(임시): QR 없이 테스트하기 위한 체크인 트리거. 실제 QR 연동 후 제거 */
   onTestCheckIn?: (seatCode: string) => void;
+  /** F22 — "체크아웃 시 알림" 신청. seat.seatSessionId 대상 구독을 등록한다. */
+  onWatchCheckout?: (seatId: number) => Promise<{ accepted: boolean; message: string }>;
 }
 
 /** design.md 4.3 — 구역 좌석 그리드 팝업. F17 필터, GS 룸 선택, 좌석 상세 진입을 오케스트레이션한다. */
@@ -34,6 +36,7 @@ export function SeatGrid({
   onReturnFromAway,
   onReport,
   onTestCheckIn,
+  onWatchCheckout,
 }: SeatGridProps) {
   const [outletOnly, setOutletOnly] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(roomNumbers?.[0] ?? null);
@@ -113,6 +116,7 @@ export function SeatGrid({
                 }
               : undefined
           }
+          onWatchCheckout={onWatchCheckout ? () => onWatchCheckout(selectedSeat.id) : undefined}
         />
       )}
 

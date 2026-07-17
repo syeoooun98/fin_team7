@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { AwayCountdown } from "@/components/away/AwayCountdown";
@@ -20,12 +23,18 @@ interface SeatDetailPanelProps {
    * "테스트" 라벨이 붙은 버튼을 노출한다. QR 연동 후 이 prop과 버튼을 제거할 것.
    */
   onTestCheckIn?: () => void;
+  /**
+   * F22 — 타인의 이용중(외출 포함) 좌석에서 "체크아웃 시 알림"을 신청.
+   * 신고와 달리 확인 모달 없이 바로 신청하고, 결과 메시지를 패널 안에 인라인으로 보여준다.
+   */
+  onWatchCheckout?: () => Promise<{ accepted: boolean; message: string }>;
 }
 
 /**
  * design.md 4.4 — 좌석 상세 패널.
  * "좌석 상태 × 점유 주체(본인/타인/없음)" 조합별로 노출 액션이 완전히 다르다는 표를 그대로 분기한다.
- * 타인의 외출 좌석(design.md 4.4 표 5행)은 의도적으로 액션 자체를 렌더링하지 않는다(F7).
+ * 타인의 외출 좌석(design.md 4.4 표 5행)은 카테고리/잔여시간 액션은 렌더링하지 않되(F7),
+ * "체크아웃 시 알림"만은 예외적으로 노출한다(F22 — 카테고리/잔여시간을 전혀 드러내지 않으므로 F7과 무관).
  */
 export function SeatDetailPanel({
   open,
@@ -37,7 +46,29 @@ export function SeatDetailPanel({
   onReturnFromAway,
   onOpenReportConfirm,
   onTestCheckIn,
+  onWatchCheckout,
 }: SeatDetailPanelProps) {
+  const [watchState, setWatchState] = useState<{ pending: boolean; message: string | null }>({
+    pending: false,
+    message: null,
+  });
+
+  const handleWatchCheckout = async () => {
+    if (!onWatchCheckout) return;
+    setWatchState({ pending: true, message: null });
+    const result = await onWatchCheckout();
+    setWatchState({ pending: false, message: result.message });
+  };
+
+  const watchButton = onWatchCheckout && (
+    <div className="space-y-1.5">
+      <Button variant="secondary" onClick={handleWatchCheckout} disabled={watchState.pending || !!watchState.message}>
+        {watchState.message ? "알림 신청됨" : "체크아웃 시 알림"}
+      </Button>
+      {watchState.message && <p className="text-xs text-foreground-subtle">{watchState.message}</p>}
+    </div>
+  );
+
   return (
     <Modal open={open} onClose={onClose} title={seat.seatCode}>
       <div className="space-y-3 text-sm text-foreground-muted">
@@ -80,15 +111,21 @@ export function SeatDetailPanel({
         )}
 
         {seat.status === "OCCUPIED" && !seat.isMine && !seat.isAway && (
-          <Button variant="danger" onClick={onOpenReportConfirm}>
-            신고하기
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="danger" onClick={onOpenReportConfirm}>
+              신고하기
+            </Button>
+            {watchButton}
+          </div>
         )}
 
         {seat.status === "OCCUPIED" && !seat.isMine && seat.isAway && (
-          <p className="rounded-xl border border-border-subtle bg-surface-soft p-3 text-foreground-muted">
-            외출 중인 좌석입니다. (카테고리·잔여시간은 비공개, F7)
-          </p>
+          <div className="space-y-2">
+            <p className="rounded-xl border border-border-subtle bg-surface-soft p-3 text-foreground-muted">
+              외출 중인 좌석입니다. (카테고리·잔여시간은 비공개, F7)
+            </p>
+            {watchButton}
+          </div>
         )}
       </div>
     </Modal>

@@ -126,6 +126,15 @@ export default function ZoneSeatGridPage({
           await reload();
           return data as { accepted: boolean; message: string };
         }}
+        onWatchCheckout={async (seatId) => {
+          const seat = findSeat(seatId);
+          if (!seat?.seatSessionId) {
+            return { accepted: false, message: "알림을 신청할 수 없는 좌석입니다." };
+          }
+          const res = await fetch(`/api/seat-sessions/${seat.seatSessionId}/watch`, { method: "POST" });
+          const data = await res.json();
+          return data as { accepted: boolean; message: string };
+        }}
       />
     </div>
   );
