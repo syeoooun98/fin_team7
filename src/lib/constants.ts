@@ -1,23 +1,30 @@
 // 자리지킴이 — design.md 2절 컬러 토큰 및 PRD 확정 상수값
 import type { AwayCategoryCode, SeatStatus, ZoneCode } from "./types";
 
-/** design.md 2.1 — 구역 식별 색. 좌석 상태 색과 절대 섞어 쓰지 않는다(맵 레벨 전용). */
+/**
+ * design.md 2.1 — 구역 식별 색. 좌석 상태 색과 절대 섞어 쓰지 않는다(맵 레벨 전용).
+ * 2026-07-17: 실제 Supabase DB의 zones.color_ref 값과 1:1 매핑되도록 교체(PRD 6.2).
+ */
 export const ZONE_COLORS: Record<ZoneCode, { token: string; hex: string }> = {
-  CZ: { token: "zone-coral", hex: "#FF7A5C" },
-  QA: { token: "zone-blue", hex: "#4C8DFF" },
-  QB: { token: "zone-navy", hex: "#2C3E7A" },
-  LZ: { token: "zone-yellow", hex: "#F5B942" },
-  OH: { token: "zone-teal", hex: "#2BB3A3" },
-  GS: { token: "zone-green", hex: "#4CAF6D" },
+  F2F1: { token: "zone-coral", hex: "#FF7A5C" },
+  F2LB: { token: "zone-slate", hex: "#64748B" },
+  F2SQ: { token: "zone-teal", hex: "#2BB3A3" },
+  F3R1: { token: "zone-blue", hex: "#4C8DFF" },
+  F3R2: { token: "zone-navy", hex: "#2C3E7A" },
+  F4CR: { token: "zone-yellow", hex: "#F5B942" },
+  F4F2: { token: "zone-green", hex: "#4CAF6D" },
+  F4FT: { token: "zone-pink", hex: "#EC4899" },
+  F4GR: { token: "zone-purple", hex: "#A855F7" },
+  // 기능 테스트용 임시 구역 — 실제 구역 색상표가 아님
+  TEST: { token: "zone-coral", hex: "#FF7A5C" },
 };
 
-/** design.md 2.2 — 좌석 상태 색 (전 구역 공통). 색 + 아이콘 + 라벨 3중 표현 원칙 필수. */
+/** design.md 2.2 — 좌석 상태 색 (전 구역 공통, 2단계: 예약가능/이용중 + 이용중 하위 외출 배지). 색 + 아이콘 + 라벨 3중 표현 원칙 필수. */
 export const SEAT_STATUS_STYLE: Record<
   SeatStatus,
   { token: string; bg: string; border: string; label: string }
 > = {
-  AVAILABLE: { token: "seat-available", bg: "#EAF7EE", border: "#2E9E52", label: "가능" },
-  EMPTY: { token: "seat-empty", bg: "#E8F1FF", border: "#3B7DDB", label: "방금 비었어요" },
+  AVAILABLE: { token: "seat-available", bg: "#EAF7EE", border: "#2E9E52", label: "예약 가능" },
   OCCUPIED: { token: "seat-occupied", bg: "#F1F1F3", border: "#6B7280", label: "이용중" },
 };
 
@@ -40,9 +47,6 @@ export const AWAY_CATEGORY_LIMIT_MINUTES: Record<AwayCategoryCode, number> = {
   MEAL: 60,
   MEETING: 90,
 };
-
-/** PRD 7.1 — "빈자리 → 예약가능" buffer. DB.md 14.4: 파일럿 검증 전이라 확정치 아님(TBD). */
-export const EMPTY_TO_AVAILABLE_BUFFER_MINUTES = 5;
 
 /** PRD 10.3 — 자리비움/신고 공통 경고 시점 공식: 잔여시간이 전체 허용시간의 20%일 때 */
 export const WARNING_THRESHOLD_RATIO = 0.2;

@@ -1,8 +1,8 @@
 # DB.md: 자리지킴이 데이터베이스 설계
 
-- 문서 상태: Draft v1.0
+- 문서 상태: Draft v1.2 (실제 9개 구역 데이터로 갱신, 좌석 수 TBD, 2026-07-17)
 - 작성일: 2026-07-17
-- 기반 문서: `PRD.md` (Draft v1.1)
+- 기반 문서: `PRD.md` (Draft v1.3)
 - DB 엔진 가정: PostgreSQL (Next.js 구현 예정 및 Supabase 연동 가능성을 고려한 기본 선택. 다른 RDBMS 채택 시 ENUM/부분 인덱스 문법만 치환하면 됨)
 - 본 문서는 스키마(테이블·컬럼·제약조건·관계)만 다룬다. 화면 레이아웃은 `design.md`, 기능 요구사항의 배경은 `PRD.md` 소관.
 
@@ -121,39 +121,44 @@ erDiagram
 
 | 컬럼 | 타입 | 제약조건 | 설명 |
 |---|---|---|---|
-| code | VARCHAR(4) | PK | `CZ`/`QA`/`QB`/`LZ`/`OH`/`GS` |
-| name | VARCHAR(50) | NOT NULL | 예: "캐주얼 라운지 존" |
-| floor | SMALLINT | NOT NULL | 1~3 |
+| code | VARCHAR(4) | PK | `F2F1`/`F2LB`/`F2SQ`/`F3R1`/`F3R2`/`F4CR`/`F4F2`/`F4FT`/`F4GR` (2026-07-17 기준 실제 구역, PRD 6.2) |
+| name | VARCHAR(50) | NOT NULL | 예: "제1자유열람실" |
+| floor | SMALLINT | NOT NULL | 2~4 |
 | color_ref | VARCHAR(20) | NOT NULL | 참고 색상 식별자. 실제 팔레트는 `design.md` 소관 |
-| description | TEXT | NULL | 성격(소음/이용목적) 메모 |
-| seat_count | SMALLINT | NOT NULL | 6.2 표의 공식 좌석 수 (정합성 검증용 — `seats` 실카운트와 반드시 일치해야 함) |
+| description | TEXT | NULL | 성격(소음/이용목적) 메모 — 현재 9개 구역 모두 미입력(TBD) |
+| seat_count | SMALLINT | NOT NULL | 6.2 표의 공식 좌석 수 (정합성 검증용 — `seats` 실카운트와 반드시 일치해야 함). 실측 전까지 전 구역 0 |
 
-**시드 데이터** (6.2절 그대로):
+**시드 데이터** (6.2절, 2026-07-17 실제 DB 반영):
 
 ```sql
 INSERT INTO zones (code, name, floor, color_ref, description, seat_count) VALUES
-('CZ', '캐주얼 라운지 존', 1, 'coral', '대화·통화 허용 수준, 노트북 자유, 카페 인접', 30),
-('QA', '조용한 열람실 A', 2, 'blue',  '완전 정숙, 개인 열람 전용', 60),
-('QB', '조용한 열람실 B', 2, 'navy',  '완전 정숙, 개인 열람 전용', 60),
-('LZ', '노트북 존',       2, 'yellow','타이핑/노트북 허용, 좌석별 콘센트', 40),
-('OH', '오픈 열람홀',     3, 'teal',  '일반 열람, 창가석 다수', 80),
-('GS', '그룹 스터디룸',   3, 'green', '방음 부스 10개 × 4인석', 40);
+('F2F1', '제1자유열람실', 2, 'coral', NULL, 0),
+('F2LB', '메인로비', 2, 'slate', NULL, 0),
+('F2SQ', '메인스퀘어', 2, 'teal', NULL, 0),
+('F3R1', '제1자료실', 3, 'blue', NULL, 0),
+('F3R2', '제2자료실', 3, 'navy', NULL, 0),
+('F4CR', '1인 연구 캐럴', 4, 'yellow', NULL, 0),
+('F4F2', '제2자유열람실', 4, 'green', NULL, 0),
+('F4FT', '미래인재양성센터', 4, 'pink', NULL, 0),
+('F4GR', '대학원 열람실', 4, 'purple', NULL, 0);
 ```
 
-### 2.3 `seats` — 좌석 (근거: 6.2, 6.3, 7.1, 14.3)
+> 좌석 수(seat_count)가 전부 0인 것은 임시값이 아니라 **현재 실측이 안 된 상태를 그대로 반영한 것**이다. 실측되는 대로 각 행의 `seat_count`를 갱신하고, `seats` 테이블에 해당 개수만큼 좌석을 추가하면 된다(3절 정합성 체크 쿼리로 항상 일치 여부 확인 가능).
+
+### 2.3 `seats` — 좌석 (근거: 6.2, 6.3, 7.1)
 
 | 컬럼 | 타입 | 제약조건 | 설명 |
 |---|---|---|---|
 | id | BIGSERIAL | PK | |
-| seat_code | VARCHAR(20) | UNIQUE, NOT NULL | `CZ-001` ~, GS는 `GS-01-1` ~ `GS-10-4` |
+| seat_code | VARCHAR(20) | UNIQUE, NOT NULL | `{zone_code}-{3자리 일련번호}` (예: `F2F1-001`) |
 | zone_code | VARCHAR(4) | NOT NULL, FK → zones(code) | |
-| room_number | SMALLINT | NULL | GS 전용(01~10). 그 외 구역은 NULL |
-| has_outlet | BOOLEAN | NOT NULL DEFAULT FALSE | LZ 구역은 시드 시 전 좌석 TRUE 고정(6.3) |
+| room_number | SMALLINT | NULL | 방 단위로 그룹핑되는 구역이 있을 때만 사용. **현재 9개 구역 중 해당하는 곳 없음** — 전부 NULL |
+| has_outlet | BOOLEAN | NOT NULL DEFAULT FALSE | 구역별 콘센트 보유 여부는 실측 필요(TBD) |
 | is_window | BOOLEAN | NOT NULL DEFAULT FALSE | |
-| status | VARCHAR(10) | NOT NULL DEFAULT 'AVAILABLE', CHECK IN ('AVAILABLE','EMPTY','OCCUPIED') | 7.1의 3대 상태. **비정규화 캐시** — 아래 4절 참고 |
-| status_changed_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | EMPTY→AVAILABLE 5분 buffer 계산 기준(7.1) 및 대시보드 "최종 갱신 시각"(9.3) 산출에 사용 |
+| status | VARCHAR(10) | NOT NULL DEFAULT 'AVAILABLE', CHECK IN ('AVAILABLE','OCCUPIED') | 7.1의 2대 상태. **비정규화 캐시** — 아래 4절 참고. (2026-07-17: 5분 buffer 전환 상태였던 `EMPTY`는 폐기, `AVAILABLE`에 흡수) |
+| status_changed_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | 좌석 상태가 마지막으로 바뀐 시각(일반 부기용) |
 
-- **GS 구역(14.3)**: v1은 방 단위 테이블을 별도로 두지 않고 개별 좌석으로 취급하는 것으로 확정했으므로, `room_number`는 조회·표시 편의를 위한 속성일 뿐 예약 단위가 아니다. Phase 2에서 "방 단위 예약"이 도입되면 이 컬럼을 FK로 승격해 `study_rooms` 테이블을 추가하면 된다.
+- **`room_number`(구 GS 방식)**: 방 단위로 그룹핑되는 구역이 생기면 그 구역 좌석에만 값을 채우는 용도로 남겨둔 컬럼이다. 2026-07-17 기준 실제 9개 구역 중에는 해당하는 곳이 없어 전부 NULL이다. 필요해지면 예약 단위를 승격하는 대신(이전 GS 결정과 동일하게) 조회 편의 속성으로만 쓰는 것을 권장.
 - **"이용중 - 재실/외출" 구분(7.2)**: `seats.status`에는 별도로 저장하지 않는다. `OCCUPIED`인 좌석에 대해 활성 `away_periods` 레코드가 있으면 "외출", 없으면 "재실"로 애플리케이션이 판단한다. 상태를 이중으로 저장하면 동기화 버그(하나만 갱신되고 다른 하나는 안 갱신)가 생기기 쉬워, 단일 소스(활성 away_periods 유무)로 판단하도록 설계했다.
 
 ### 2.4 `away_categories` — 자리비움 카테고리 코드 테이블 (근거: F5, 10.1, 10.2)
@@ -285,7 +290,7 @@ SELECT z.code, z.seat_count AS expected, COUNT(s.id) AS actual
 FROM zones z LEFT JOIN seats s ON s.zone_code = z.code
 GROUP BY z.code, z.seat_count
 HAVING z.seat_count <> COUNT(s.id);
--- 결과가 0행이어야 6.2절 좌석 수(합계 310석)와 실제 시드 데이터가 일치함
+-- 결과가 0행이어야 6.2절 좌석 수(현재 전 구역 0석, TBD)와 실제 시드 데이터가 일치함
 ```
 
 ---
@@ -297,8 +302,9 @@ HAVING z.seat_count <> COUNT(s.id);
 | 이벤트 | status 전이 |
 |---|---|
 | 체크인 성공 | → `OCCUPIED` |
-| 체크아웃(수동/자동/신고반납) | → `EMPTY` (+ `status_changed_at = now()`) |
-| `EMPTY` 후 5분 경과 | → `AVAILABLE` (7.1) — 폴링 조회 시점에 `now() - status_changed_at >= 5분`이면 `AVAILABLE`로 간주하는 **읽기 시점 계산**과, 배치/크론으로 실제 값을 갱신하는 **쓰기 시점 갱신** 중 하나를 기술설계 단계에서 선택. 어느 쪽이든 스키마는 동일하게 지원 |
+| 체크아웃(수동/자동/신고반납) | → `AVAILABLE` (+ `status_changed_at = now()`), 지연 없이 즉시 반영 |
+
+> **폐기된 설계(2026-07-17)**: 이전 버전은 체크아웃 시 `EMPTY`로 전이했다가 5분 buffer 후 `AVAILABLE`로 넘어가는 3단계 상태 머신이었다. "빈자리" 표시 상태 자체를 폐기하기로 확정하면서(PRD 7.1) 더 이상 필요 없어졌고, `SeatStatus` enum도 `AVAILABLE`/`OCCUPIED` 2개 값으로 줄었다(Postgres enum은 값을 직접 DROP할 수 없어 rename-recreate-cast 마이그레이션으로 적용).
 
 실시간 동기화 기술(폴링/웹소켓/SSE)은 13절 리스크에 따라 여전히 미확정이지만, 이 스키마는 어느 방식을 택하든 그대로 사용 가능하다(상태를 갱신하는 쪽이 DB고, 그 변경을 클라이언트에 전파하는 방식만 달라짐).
 
@@ -343,7 +349,7 @@ WHERE resolved_at < now() - INTERVAL '90 days'
 | 9.2 익명성 보안 | 5절 |
 | 9.2 감사 로그 (14.6) | 5절 |
 | 9.2 확장성(카테고리) | `away_categories` 코드 테이블 |
-| 14.3 그룹 스터디룸 | `seats.room_number` (Phase 2 확장 여지만 남김) |
+| 방 단위 그룹핑 대비 | `seats.room_number` (현재 사용하는 구역 없음, 향후 확장 여지만 남김) |
 
 ---
 
@@ -351,4 +357,4 @@ WHERE resolved_at < now() - INTERVAL '90 days'
 
 - 운영자 권한/역할 테이블 (F19 구현 시 추가 필요, 5절 오픈 이슈)
 - 좌석 필터·통계용 파생 테이블(F17, F20, F21) — v1 Could 요구사항이며, 기존 테이블 쿼리로 충분히 커버 가능해 별도 테이블 없이 시작
-- 그룹 스터디룸 "방" 단위 엔티티 — 14.3에서 v1은 개별 좌석 취급으로 확정했으므로 Phase 2 이후 필요 시 추가
+- "방" 단위 엔티티 — 2026-07-17 기준 실제 9개 구역 중 방 단위 그룹핑이 필요한 곳이 없어 별도 테이블 없이 시작. 그런 구역이 추가되면 `seats.room_number`를 채우는 정도로 대응하고, 예약 단위 승격이 필요해지면 그때 테이블을 추가

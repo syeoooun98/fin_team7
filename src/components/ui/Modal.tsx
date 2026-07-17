@@ -8,11 +8,14 @@ export function Modal({
   onClose,
   title,
   children,
+  dismissible = true,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
+  /** false면 닫기(✕) 버튼을 숨긴다 — 반드시 버튼 액션으로만 닫혀야 하는 강제 팝업(예: 신고 확인 인증)용 */
+  dismissible?: boolean;
 }) {
   if (!open) return null;
 
@@ -21,13 +24,15 @@ export function Modal({
       <div className="w-full max-w-md rounded-t-2xl bg-white p-5 shadow-xl sm:rounded-2xl">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-base font-semibold">{title}</h2>
-          <button
-            onClick={onClose}
-            aria-label="닫기"
-            className="text-neutral-400 hover:text-neutral-700"
-          >
-            ✕
-          </button>
+          {dismissible && (
+            <button
+              onClick={onClose}
+              aria-label="닫기"
+              className="text-neutral-400 hover:text-neutral-700"
+            >
+              ✕
+            </button>
+          )}
         </div>
         {children}
       </div>
