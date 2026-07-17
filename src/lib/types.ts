@@ -2,7 +2,31 @@
 // Prisma 생성 타입을 클라이언트 컴포넌트에서 직접 import하지 않기 위해,
 // DB.md 스키마를 그대로 옮긴 순수 TS 타입을 별도로 둔다.
 
-export type ZoneCode = "CZ" | "QA" | "QB" | "LZ" | "OH" | "GS";
+export type ZoneCode =
+  | "F2F1"
+  | "F2SQ"
+  | "F2LB"
+  | "F2CF"
+  | "F2MD"
+  | "F2LK"
+  | "F2RS"
+  | "F2CE"
+  | "F3R1"
+  | "F3R2"
+  | "F3AR"
+  | "F3RC"
+  | "F3DR"
+  | "F3LN"
+  | "F3MT"
+  | "F3SC"
+  | "F4F2"
+  | "F4GR"
+  | "F4CR"
+  | "F4FT"
+  | "F4SM"
+  | "F4RS"
+  | "F5ED"
+  | "F5EX";
 
 export type SeatStatus = "AVAILABLE" | "EMPTY" | "OCCUPIED";
 

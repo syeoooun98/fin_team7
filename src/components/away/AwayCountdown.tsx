@@ -26,20 +26,20 @@ export function AwayCountdown({
   const ringColor = isWarning ? SEMANTIC_COLORS.warnAmber : SEMANTIC_COLORS.selfRing;
 
   return (
-    <div className="flex flex-col items-center gap-3 rounded-xl border border-neutral-200 p-4">
-      <p className="text-sm text-neutral-500">{categoryLabel} · 자리비움 진행 중</p>
+    <div className="flex flex-col items-center gap-3 rounded-2xl border border-border-subtle bg-surface-soft p-5">
+      <p className="text-sm font-medium text-foreground-muted">{categoryLabel} · 자리비움 진행 중</p>
       <div
-        className="relative flex h-24 w-24 items-center justify-center rounded-full"
+        className="relative flex h-24 w-24 items-center justify-center rounded-full shadow-[var(--shadow-card)]"
         style={{
           background: `conic-gradient(${ringColor} ${progressPercent}%, #e5e7eb 0)`,
         }}
       >
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white text-lg font-semibold">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white text-lg font-bold text-foreground">
           {formatMinutesSeconds(remainingSeconds)}
         </div>
       </div>
       {isWarning && (
-        <p className="text-xs font-medium" style={{ color: SEMANTIC_COLORS.warnAmber }}>
+        <p className="text-xs font-semibold" style={{ color: SEMANTIC_COLORS.warnAmber }}>
           곧 자동 반납됩니다
         </p>
       )}

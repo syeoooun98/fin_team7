@@ -5,13 +5,33 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// 2026-07-17 실제 2~5층 방 이름 기준(1차). 2026-07-17(2차) 더 상세한 2F~5F.png 반영해 24개 구역으로 확장.
+// 좌석 배치는 아직 확정 전이라 seatCount 0(구역만 시드).
 const ZONES = [
-  { code: "CZ", name: "캐주얼 라운지 존", floor: 1, colorRef: "coral", description: "대화·통화 허용 수준, 노트북 자유, 카페 인접", seatCount: 30 },
-  { code: "QA", name: "조용한 열람실 A", floor: 2, colorRef: "blue", description: "완전 정숙, 개인 열람 전용", seatCount: 60 },
-  { code: "QB", name: "조용한 열람실 B", floor: 2, colorRef: "navy", description: "완전 정숙, 개인 열람 전용", seatCount: 60 },
-  { code: "LZ", name: "노트북 존", floor: 2, colorRef: "yellow", description: "타이핑/노트북 허용, 좌석별 콘센트", seatCount: 40 },
-  { code: "OH", name: "오픈 열람홀", floor: 3, colorRef: "teal", description: "일반 열람, 창가석 다수", seatCount: 80 },
-  { code: "GS", name: "그룹 스터디룸", floor: 3, colorRef: "green", description: "방음 부스 10개 × 4인석", seatCount: 40 },
+  { code: "F2F1", name: "제1자유열람실", floor: 2, colorRef: "coral", description: null, seatCount: 0 },
+  { code: "F2SQ", name: "메인스퀘어", floor: 2, colorRef: "teal", description: null, seatCount: 0 },
+  { code: "F2LB", name: "메인로비", floor: 2, colorRef: "slate", description: null, seatCount: 0 },
+  { code: "F2CF", name: "컨퍼런스룸", floor: 2, colorRef: "indigo", description: null, seatCount: 0 },
+  { code: "F2MD", name: "미디어실", floor: 2, colorRef: "cyan", description: null, seatCount: 0 },
+  { code: "F2LK", name: "락커룸", floor: 2, colorRef: "amber", description: null, seatCount: 0 },
+  { code: "F2RS", name: "휴게실", floor: 2, colorRef: "lime", description: null, seatCount: 0 },
+  { code: "F2CE", name: "카페", floor: 2, colorRef: "brown", description: null, seatCount: 0 },
+  { code: "F3R1", name: "제1자료실", floor: 3, colorRef: "blue", description: null, seatCount: 0 },
+  { code: "F3R2", name: "제2자료실", floor: 3, colorRef: "navy", description: null, seatCount: 0 },
+  { code: "F3AR", name: "수서/정리실", floor: 3, colorRef: "sky", description: null, seatCount: 0 },
+  { code: "F3RC", name: "학술정보운영팀(리서치커먼스)", floor: 3, colorRef: "violet", description: null, seatCount: 0 },
+  { code: "F3DR", name: "도서관장실", floor: 3, colorRef: "rose", description: null, seatCount: 0 },
+  { code: "F3LN", name: "대출실", floor: 3, colorRef: "emerald", description: null, seatCount: 0 },
+  { code: "F3MT", name: "회의실", floor: 3, colorRef: "fuchsia", description: null, seatCount: 0 },
+  { code: "F3SC", name: "악보서가", floor: 3, colorRef: "orange", description: null, seatCount: 0 },
+  { code: "F4F2", name: "제2자유열람실", floor: 4, colorRef: "green", description: null, seatCount: 0 },
+  { code: "F4GR", name: "대학원 열람실", floor: 4, colorRef: "purple", description: null, seatCount: 0 },
+  { code: "F4CR", name: "1인 연구 캐럴", floor: 4, colorRef: "yellow", description: null, seatCount: 0 },
+  { code: "F4FT", name: "미래인재양성센터", floor: 4, colorRef: "pink", description: null, seatCount: 0 },
+  { code: "F4SM", name: "대학원세미나실", floor: 4, colorRef: "teal", description: null, seatCount: 0 },
+  { code: "F4RS", name: "휴게실", floor: 4, colorRef: "lime", description: null, seatCount: 0 },
+  { code: "F5ED", name: "학술정보이용교육실", floor: 5, colorRef: "indigo", description: null, seatCount: 0 },
+  { code: "F5EX", name: "고시반", floor: 5, colorRef: "rose", description: null, seatCount: 0 },
 ] as const;
 
 const AWAY_CATEGORIES = [
@@ -27,32 +47,19 @@ function padSeatNumber(n: number) {
 }
 
 function buildSeatsForZone(zoneCode: (typeof ZONES)[number]["code"], seatCount: number) {
-  if (zoneCode === "GS") {
-    // GS-{룸번호 01~10}-{좌석 1~4} — PRD 6.2절 좌석 ID 규칙
-    const seats: { seatCode: string; zoneCode: string; roomNumber: number; hasOutlet: boolean }[] = [];
-    for (let room = 1; room <= 10; room++) {
-      for (let seat = 1; seat <= 4; seat++) {
-        seats.push({
-          seatCode: `GS-${String(room).padStart(2, "0")}-${seat}`,
-          zoneCode,
-          roomNumber: room,
-          hasOutlet: false,
-        });
-      }
-    }
-    return seats;
-  }
-
   return Array.from({ length: seatCount }, (_, i) => ({
     seatCode: `${zoneCode}-${padSeatNumber(i + 1)}`,
     zoneCode,
     roomNumber: null as number | null,
-    // LZ 구역은 전 좌석 콘센트 보유로 고정 가정 (PRD 6.3)
-    hasOutlet: zoneCode === "LZ",
+    hasOutlet: false,
   }));
 }
 
 async function main() {
+  // 구역 체계가 통째로 바뀌었으므로(과거 CZ/QA/QB/LZ/OH/GS) 남은 좌석/구역을 먼저 비운다.
+  await prisma.seat.deleteMany();
+  await prisma.zone.deleteMany();
+
   for (const zone of ZONES) {
     await prisma.zone.upsert({
       where: { code: zone.code },
@@ -81,7 +88,7 @@ async function main() {
   }
 
   const seatTotal = await prisma.seat.count();
-  console.log(`시드 완료: 좌석 ${seatTotal}석 (예상 310석)`);
+  console.log(`시드 완료: 구역 ${ZONES.length}개, 좌석 ${seatTotal}석 (좌석 배치 확정 전이라 0석 예상)`);
 }
 
 main()

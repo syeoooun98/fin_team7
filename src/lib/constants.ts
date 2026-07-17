@@ -2,13 +2,32 @@
 import type { AwayCategoryCode, SeatStatus, ZoneCode } from "./types";
 
 /** design.md 2.1 — 구역 식별 색. 좌석 상태 색과 절대 섞어 쓰지 않는다(맵 레벨 전용). */
+// 파스텔 네온 톤(채도를 낮춘 밝은 톤이지만 선명하게 도드라지는 형광 계열) 24개 확정값.
 export const ZONE_COLORS: Record<ZoneCode, { token: string; hex: string }> = {
-  CZ: { token: "zone-coral", hex: "#FF7A5C" },
-  QA: { token: "zone-blue", hex: "#4C8DFF" },
-  QB: { token: "zone-navy", hex: "#2C3E7A" },
-  LZ: { token: "zone-yellow", hex: "#F5B942" },
-  OH: { token: "zone-teal", hex: "#2BB3A3" },
-  GS: { token: "zone-green", hex: "#4CAF6D" },
+  F2F1: { token: "zone-mint-neon", hex: "#7CF5C4" },
+  F2SQ: { token: "zone-sky-neon", hex: "#6FE3F5" },
+  F2LB: { token: "zone-lavender", hex: "#C7B9FF" },
+  F2CF: { token: "zone-periwinkle", hex: "#9DB4FF" },
+  F2MD: { token: "zone-violet-neon", hex: "#D9A6FF" },
+  F2LK: { token: "zone-peach", hex: "#FFC98C" },
+  F2RS: { token: "zone-lemon", hex: "#FDE68A" },
+  F2CE: { token: "zone-salmon", hex: "#FF9EAE" },
+  F3R1: { token: "zone-turquoise", hex: "#5EEAD4" },
+  F3R2: { token: "zone-baby-blue", hex: "#8FC1FF" },
+  F3AR: { token: "zone-light-green", hex: "#9BF6C4" },
+  F3RC: { token: "zone-fuchsia-neon", hex: "#F3A8FF" },
+  F3DR: { token: "zone-rose", hex: "#FFA6B8" },
+  F3LN: { token: "zone-lime", hex: "#C6F76B" },
+  F3MT: { token: "zone-tangerine", hex: "#FFBE7B" },
+  F3SC: { token: "zone-indigo-lavender", hex: "#B4B8FF" },
+  F4F2: { token: "zone-aqua-neon", hex: "#6FE9E1" },
+  F4GR: { token: "zone-purple", hex: "#C9AEFF" },
+  F4CR: { token: "zone-yellow-neon", hex: "#FCE96A" },
+  F4FT: { token: "zone-hot-pink", hex: "#FFA8D8" },
+  F4SM: { token: "zone-green-neon", hex: "#93F7A8" },
+  F4RS: { token: "zone-coral", hex: "#FFAFAF" },
+  F5ED: { token: "zone-sky-blue", hex: "#83D9FF" },
+  F5EX: { token: "zone-magenta-violet", hex: "#E29CFF" },
 };
 
 /** design.md 2.2 — 좌석 상태 색 (전 구역 공통). 색 + 아이콘 + 라벨 3중 표현 원칙 필수. */

@@ -11,7 +11,7 @@ export function Badge({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${className}`}
+      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold shadow-[0_1px_2px_rgba(15,23,42,0.06)] ${className}`}
       style={{ backgroundColor: bg, borderColor: border, color: border }}
     >
       {label}

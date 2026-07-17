@@ -13,7 +13,7 @@ interface SeatGridProps {
   /** seat.id -> 본인 상세 (본인 점유 좌석에만 존재) */
   ownDetailsBySeatId: Record<number, OwnSeatDetail>;
   awayCategories: AwayCategory[];
-  /** GS 구역만 전달 — 룸 선택 탭 노출용(DB.md 14.3) */
+  /** 룸 단위로 나뉜 구역에서만 전달 — 룸 선택 탭 노출용(DB.md 14.3) */
   roomNumbers?: number[];
   onCheckout: (seatId: number) => void;
   onRequestAway: (seatId: number, categoryCode: AwayCategoryCode) => void;
@@ -58,21 +58,28 @@ export function SeatGrid({
             onSelect={setSelectedRoom}
           />
         )}
-        <label className="ml-auto flex items-center gap-2 text-sm text-neutral-600">
+        <label className="ml-auto flex items-center gap-2 rounded-full border border-border-subtle bg-white px-3 py-1.5 text-sm text-foreground-muted shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
           <input
             type="checkbox"
             checked={outletOnly}
             onChange={(e) => setOutletOnly(e.target.checked)}
+            className="accent-brand"
           />
           콘센트 있는 좌석만 (F17)
         </label>
       </div>
 
-      <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8">
-        {visibleSeats.map((seat) => (
-          <SeatCell key={seat.id} seat={seat} onClick={() => setSelectedSeatId(seat.id)} />
-        ))}
-      </div>
+      {seats.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-border-strong bg-white/60 p-8 text-center text-sm text-foreground-muted">
+          아직 좌석 데이터가 등록되지 않은 구역입니다.
+        </p>
+      ) : (
+        <div className="grid grid-cols-4 gap-2.5 sm:grid-cols-6 md:grid-cols-8">
+          {visibleSeats.map((seat) => (
+            <SeatCell key={seat.id} seat={seat} onClick={() => setSelectedSeatId(seat.id)} />
+          ))}
+        </div>
+      )}
 
       {selectedSeat && (
         <SeatDetailPanel

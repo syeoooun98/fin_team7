@@ -8,11 +8,14 @@ export interface ToastPayload {
 export function Toast({ message, tone = "info" }: ToastPayload) {
   const toneClass =
     tone === "warning"
-      ? "border-warn-amber bg-amber-50 text-amber-900"
-      : "border-neutral-200 bg-white text-neutral-800";
+      ? "border-warn-amber/40 bg-amber-50 text-amber-900"
+      : "border-border-subtle bg-white text-foreground";
 
   return (
-    <div className={`rounded-lg border px-4 py-3 text-sm shadow-md ${toneClass}`} role="status">
+    <div
+      className={`rounded-2xl border px-4 py-3 text-sm font-medium shadow-[0_16px_32px_-16px_rgba(43,45,90,0.35)] ${toneClass}`}
+      role="status"
+    >
       {message}
     </div>
   );
