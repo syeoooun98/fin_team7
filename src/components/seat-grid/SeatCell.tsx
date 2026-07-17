@@ -14,7 +14,7 @@ export function SeatCell({ seat, onClick }: { seat: PublicSeatView; onClick: () 
   return (
     <button
       onClick={onClick}
-      className="relative flex flex-col items-center justify-center gap-0.5 rounded-lg border p-2 text-xs transition hover:opacity-80"
+      className="relative flex flex-col items-center justify-center gap-0.5 rounded-xl border p-2 text-xs shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_6px_14px_-6px_rgba(15,23,42,0.25)]"
       style={{
         backgroundColor: style.bg,
         borderColor: style.border,
@@ -22,13 +22,13 @@ export function SeatCell({ seat, onClick }: { seat: PublicSeatView; onClick: () 
         outlineOffset: seat.isMine ? "2px" : undefined,
       }}
     >
-      <span className="font-semibold" style={{ color: style.border }}>
+      <span className="font-bold" style={{ color: style.border }}>
         {seatNumberLabel}
       </span>
-      <span className="text-[10px] text-neutral-600">{style.label}</span>
+      <span className="text-[10px] text-foreground-muted">{style.label}</span>
       {seat.isAway && (
         <span
-          className="absolute -top-2 rounded-full border px-1.5 text-[10px]"
+          className="absolute -top-2 rounded-full border px-1.5 text-[10px] font-medium shadow-[0_1px_2px_rgba(15,23,42,0.08)]"
           style={{ backgroundColor: AWAY_BADGE_STYLE.bg, borderColor: AWAY_BADGE_STYLE.border }}
         >
           {AWAY_BADGE_STYLE.label}

@@ -3,6 +3,7 @@
 import { use, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SeatGrid } from "@/components/seat-grid/SeatGrid";
+import { ZONE_META } from "@/lib/mock-data";
 import type { AwayCategory, AwayCategoryCode, OwnSeatDetail, PublicSeatView, ZoneCode } from "@/lib/types";
 
 /**
@@ -18,6 +19,7 @@ export default function ZoneSeatGridPage({
   const { zoneCode } = use(params);
   const router = useRouter();
   const zone = zoneCode.toUpperCase() as ZoneCode;
+  const zoneName = ZONE_META.find((z) => z.code === zone)?.name ?? zone;
 
   const [seats, setSeats] = useState<PublicSeatView[]>([]);
   const [categories, setCategories] = useState<AwayCategory[]>([]);
@@ -62,10 +64,16 @@ export default function ZoneSeatGridPage({
 
   return (
     <div className="space-y-4">
-      <button onClick={() => router.push("/map")} className="text-sm text-neutral-500 hover:text-neutral-800">
+      <button
+        onClick={() => router.push("/map")}
+        className="inline-flex items-center gap-1 text-sm font-medium text-foreground-muted transition hover:text-brand"
+      >
         ← 맵으로 돌아가기
       </button>
-      <h1 className="text-xl font-bold">{zone} 좌석</h1>
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wide text-brand">{zone}</p>
+        <h1 className="text-2xl font-bold text-foreground">{zoneName} 좌석</h1>
+      </div>
 
       {error && <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">{error}</p>}
 

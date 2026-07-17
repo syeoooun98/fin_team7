@@ -27,12 +27,12 @@ export function AwayRequestModal({
   return (
     <Modal open={open} onClose={onClose} title="자리 비움">
       {isCoolingDown && (
-        <p className="mb-3 rounded-lg bg-amber-50 p-3 text-xs text-amber-900">
+        <p className="mb-3 rounded-xl border border-warn-amber/30 bg-amber-50 p-3 text-xs text-amber-900">
           자리 비움은 이전 이용 종료 후 30분이 지나야 재신청할 수 있습니다 ({cooldownMinutes}분
           남음)
         </p>
       )}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2.5">
         {categories
           .filter((c) => c.active)
           .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -41,10 +41,10 @@ export function AwayRequestModal({
               key={category.code}
               disabled={isCoolingDown}
               onClick={() => onSelectCategory(category.code)}
-              className="rounded-lg border border-neutral-200 p-3 text-left text-sm hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl border border-border-subtle bg-surface-soft p-3.5 text-left text-sm transition hover:border-brand hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border-subtle disabled:hover:bg-surface-soft"
             >
-              <p className="font-medium">{category.label}</p>
-              <p className="text-xs text-neutral-500">{category.limitMinutes}분</p>
+              <p className="font-semibold text-foreground">{category.label}</p>
+              <p className="text-xs text-foreground-muted">{category.limitMinutes}분</p>
             </button>
           ))}
       </div>

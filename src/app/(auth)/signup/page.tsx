@@ -36,30 +36,30 @@ export default function SignupPage() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="mb-1 block text-sm text-neutral-600">학번</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground-muted">학번</label>
         <input
           value={studentId}
           onChange={(e) => setStudentId(e.target.value)}
-          className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+          className="w-full rounded-xl border border-border-strong bg-surface-soft px-3.5 py-2.5 text-sm outline-none transition focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand-soft-strong"
           required
         />
       </div>
       <div>
-        <label className="mb-1 block text-sm text-neutral-600">비밀번호</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground-muted">비밀번호</label>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+          className="w-full rounded-xl border border-border-strong bg-surface-soft px-3.5 py-2.5 text-sm outline-none transition focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand-soft-strong"
           required
         />
       </div>
-      {error && <p className="text-sm text-danger-muted">{error}</p>}
+      {error && <p className="rounded-lg bg-danger-muted/10 px-3 py-2 text-sm text-danger-muted">{error}</p>}
       <Button type="submit" disabled={submitting} className="w-full">
         회원가입
       </Button>
-      <p className="text-center text-sm text-neutral-500">
-        이미 계정이 있으신가요? <Link href="/login" className="font-medium text-self-ring">로그인</Link>
+      <p className="text-center text-sm text-foreground-muted">
+        이미 계정이 있으신가요? <Link href="/login" className="font-semibold text-brand">로그인</Link>
       </p>
     </form>
   );
