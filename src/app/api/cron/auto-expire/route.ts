@@ -45,7 +45,7 @@ export async function GET(request: Request) {
         });
         await tx.seat.update({
           where: { id: away.seatSession.seatId },
-          data: { status: "EMPTY", statusChangedAt: now },
+          data: { status: "AVAILABLE", statusChangedAt: now },
         });
         await tx.notification.create({
           data: {
@@ -93,7 +93,7 @@ export async function GET(request: Request) {
         });
         await tx.seat.update({
           where: { id: report.seatSession.seatId },
-          data: { status: "EMPTY", statusChangedAt: now },
+          data: { status: "AVAILABLE", statusChangedAt: now },
         });
         await tx.notification.create({
           data: {

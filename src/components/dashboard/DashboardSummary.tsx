@@ -6,7 +6,6 @@ import { ZoneOccupancyBar } from "./ZoneOccupancyBar";
 export function DashboardSummary({ data }: { data: DashboardSummaryData }) {
   const stats = [
     { key: "available", label: SEAT_STATUS_STYLE.AVAILABLE.label, value: data.available, color: SEAT_STATUS_STYLE.AVAILABLE.border },
-    { key: "empty", label: SEAT_STATUS_STYLE.EMPTY.label, value: data.empty, color: SEAT_STATUS_STYLE.EMPTY.border },
     { key: "occupied", label: SEAT_STATUS_STYLE.OCCUPIED.label, value: data.occupied, color: SEAT_STATUS_STYLE.OCCUPIED.border },
   ];
 
@@ -17,7 +16,7 @@ export function DashboardSummary({ data }: { data: DashboardSummaryData }) {
         <p className="text-xs text-neutral-400">{data.updatedAt} 기준 갱신</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         {stats.map((stat) => (
           <div key={stat.key} className="rounded-xl border border-neutral-200 p-4 text-center">
             <p className="text-2xl font-bold" style={{ color: stat.color }}>

@@ -16,6 +16,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const now = new Date();
+  const activeReport = await prisma.report.findFirst({
+    where: { seatSessionId: session.id, status: "ACTIVE" },
+  });
+
   await prisma.$transaction(async (tx) => {
     // 외출 중 그대로 체크아웃하는 예외 케이스 (DB.md 2.6절 end_reason SESSION_CHECKOUT)
     await tx.awayPeriod.updateMany({
@@ -28,7 +32,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
     await tx.seat.update({
       where: { id: session.seatId },
-      data: { status: "EMPTY", statusChangedAt: now },
+      data: { status: "AVAILABLE", statusChangedAt: now },
     });
     await tx.notification.create({
       data: {
@@ -38,6 +42,25 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         message: "체크아웃이 완료되었습니다.",
       },
     });
+
+    // "자리 복귀를 인증하세요" 팝업에서 자리 복귀 대신 체크아웃을 선택한 경우 —
+    // 활성 신고를 종결하고 신고자에게 익명 알림을 보낸다.
+    if (activeReport) {
+      await tx.report.update({
+        where: { id: activeReport.id },
+        data: { status: "CHECKED_OUT", resolvedAt: now },
+      });
+      if (activeReport.reporterUserId) {
+        await tx.notification.create({
+          data: {
+            userId: activeReport.reporterUserId,
+            type: "REPORT_CHECKED_OUT",
+            reportId: activeReport.id,
+            message: "신고된 좌석이 체크아웃되었습니다!",
+          },
+        });
+      }
+    }
   });
 
   return NextResponse.json({ ok: true });
