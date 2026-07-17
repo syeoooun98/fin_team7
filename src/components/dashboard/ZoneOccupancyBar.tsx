@@ -1,9 +1,9 @@
 import { SEAT_STATUS_STYLE, ZONE_COLORS } from "@/lib/constants";
 import type { DashboardZoneSummary } from "@/lib/types";
 
-/** design.md 4.8 — 구역 한 줄당 예약가능/빈자리/이용중 3색 스택 바 */
+/** design.md 4.8 — 구역 한 줄당 예약가능/이용중 2색 스택 바 */
 export function ZoneOccupancyBar({ summary }: { summary: DashboardZoneSummary }) {
-  const { total, available, empty, occupied, zoneName, zoneCode, floor } = summary;
+  const { total, available, occupied, zoneName, zoneCode, floor } = summary;
   const pct = (n: number) => (total > 0 ? (n / total) * 100 : 0);
   const zoneColor = ZONE_COLORS[zoneCode]?.hex ?? "#8A93A6";
 
@@ -23,12 +23,11 @@ export function ZoneOccupancyBar({ summary }: { summary: DashboardZoneSummary })
             </span>
           </span>
           <span className="shrink-0 text-foreground-muted">
-            {available + empty} / {total} 가능
+            {available} / {total} 가능
           </span>
         </div>
         <div className="flex h-2 w-full overflow-hidden rounded-full bg-white">
           <div style={{ width: `${pct(available)}%`, backgroundColor: SEAT_STATUS_STYLE.AVAILABLE.border }} />
-          <div style={{ width: `${pct(empty)}%`, backgroundColor: SEAT_STATUS_STYLE.EMPTY.border }} />
           <div style={{ width: `${pct(occupied)}%`, backgroundColor: SEAT_STATUS_STYLE.OCCUPIED.border }} />
         </div>
       </div>

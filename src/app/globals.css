@@ -19,22 +19,35 @@
   --brand-soft: #f1ecfe;
   --brand-soft-strong: #e4d9fd;
 
-  /* design.md 2.1 — 구역 식별 색 (맵/층 뷰 전용, 좌석 상태 색과 혼용 금지). lib/constants.ts ZONE_COLORS와 동일 값 */
-  --zone-coral: #ff7a5c;
-  --zone-teal: #2bb3a3;
-  --zone-slate: #8a93a6;
-  --zone-blue: #4c8dff;
-  --zone-navy: #2c3e7a;
-  --zone-green: #4caf6d;
-  --zone-purple: #8b5cf6;
-  --zone-yellow: #f5b942;
-  --zone-pink: #e0559b;
+  /* design.md 2.1 — 구역 식별 색 (맵/층 뷰 전용, 좌석 상태 색과 혼용 금지). lib/constants.ts ZONE_COLORS와 동일 값 (파스텔 네온 24개) */
+  --zone-coral: #ffafaf;
+  --zone-mint-neon: #7cf5c4;
+  --zone-sky-neon: #6fe3f5;
+  --zone-lavender: #c7b9ff;
+  --zone-periwinkle: #9db4ff;
+  --zone-violet-neon: #d9a6ff;
+  --zone-peach: #ffc98c;
+  --zone-lemon: #fde68a;
+  --zone-salmon: #ff9eae;
+  --zone-turquoise: #5eead4;
+  --zone-baby-blue: #8fc1ff;
+  --zone-light-green: #9bf6c4;
+  --zone-fuchsia-neon: #f3a8ff;
+  --zone-rose: #ffa6b8;
+  --zone-lime: #c6f76b;
+  --zone-tangerine: #ffbe7b;
+  --zone-indigo-lavender: #b4b8ff;
+  --zone-aqua-neon: #6fe9e1;
+  --zone-purple: #c9aeff;
+  --zone-yellow-neon: #fce96a;
+  --zone-hot-pink: #ffa8d8;
+  --zone-green-neon: #93f7a8;
+  --zone-sky-blue: #83d9ff;
+  --zone-magenta-violet: #e29cff;
 
-  /* design.md 2.2 — 좌석 상태 색 (전 구역 공통) */
+  /* design.md 2.2 — 좌석 상태 색 (전 구역 공통, 예약가능/이용중 2단계) */
   --seat-available-bg: #eaf7ee;
   --seat-available-border: #2e9e52;
-  --seat-empty-bg: #e8f1ff;
-  --seat-empty-border: #3b7ddb;
   --seat-occupied-bg: #f1f1f3;
   --seat-occupied-border: #6b7280;
 
@@ -67,19 +80,32 @@
   --color-brand-soft-strong: var(--brand-soft-strong);
 
   --color-zone-coral: var(--zone-coral);
-  --color-zone-teal: var(--zone-teal);
-  --color-zone-slate: var(--zone-slate);
-  --color-zone-blue: var(--zone-blue);
-  --color-zone-navy: var(--zone-navy);
-  --color-zone-green: var(--zone-green);
+  --color-zone-mint-neon: var(--zone-mint-neon);
+  --color-zone-sky-neon: var(--zone-sky-neon);
+  --color-zone-lavender: var(--zone-lavender);
+  --color-zone-periwinkle: var(--zone-periwinkle);
+  --color-zone-violet-neon: var(--zone-violet-neon);
+  --color-zone-peach: var(--zone-peach);
+  --color-zone-lemon: var(--zone-lemon);
+  --color-zone-salmon: var(--zone-salmon);
+  --color-zone-turquoise: var(--zone-turquoise);
+  --color-zone-baby-blue: var(--zone-baby-blue);
+  --color-zone-light-green: var(--zone-light-green);
+  --color-zone-fuchsia-neon: var(--zone-fuchsia-neon);
+  --color-zone-rose: var(--zone-rose);
+  --color-zone-lime: var(--zone-lime);
+  --color-zone-tangerine: var(--zone-tangerine);
+  --color-zone-indigo-lavender: var(--zone-indigo-lavender);
+  --color-zone-aqua-neon: var(--zone-aqua-neon);
   --color-zone-purple: var(--zone-purple);
-  --color-zone-yellow: var(--zone-yellow);
-  --color-zone-pink: var(--zone-pink);
+  --color-zone-yellow-neon: var(--zone-yellow-neon);
+  --color-zone-hot-pink: var(--zone-hot-pink);
+  --color-zone-green-neon: var(--zone-green-neon);
+  --color-zone-sky-blue: var(--zone-sky-blue);
+  --color-zone-magenta-violet: var(--zone-magenta-violet);
 
   --color-seat-available-bg: var(--seat-available-bg);
   --color-seat-available-border: var(--seat-available-border);
-  --color-seat-empty-bg: var(--seat-empty-bg);
-  --color-seat-empty-border: var(--seat-empty-border);
   --color-seat-occupied-bg: var(--seat-occupied-bg);
   --color-seat-occupied-border: var(--seat-occupied-border);
 

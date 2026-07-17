@@ -1,28 +1,8 @@
 // 자리지킴이 — 좌석/자리비움/신고 상태 파생 로직
-// DB.md 4절(좌석 상태 동기화 방식), PRD 10.3(경고 공식)/10.4(쿨다운)의 계산 규칙을 그대로 구현한다.
-import {
-  AWAY_COOLDOWN_MINUTES,
-  EMPTY_TO_AVAILABLE_BUFFER_MINUTES,
-  WARNING_THRESHOLD_RATIO,
-} from "./constants";
-import type { SeatStatus } from "./types";
+// PRD 10.3(경고 공식)/10.4(쿨다운)의 계산 규칙을 그대로 구현한다.
+import { AWAY_COOLDOWN_MINUTES, WARNING_THRESHOLD_RATIO } from "./constants";
 
 const MINUTE_MS = 60_000;
-
-/**
- * DB.md 4절 "읽기 시점 계산" 방식.
- * status가 EMPTY라도 5분(버퍼)이 지났으면 화면에는 AVAILABLE로 표시한다.
- * (실제 DB 컬럼 갱신은 배치/크론이 별도로 하든 안 하든, 화면 표시는 항상 이 함수를 거친다)
- */
-export function deriveDisplaySeatStatus(
-  status: SeatStatus,
-  statusChangedAt: Date,
-  now: Date = new Date(),
-): SeatStatus {
-  if (status !== "EMPTY") return status;
-  const elapsedMs = now.getTime() - statusChangedAt.getTime();
-  return elapsedMs >= EMPTY_TO_AVAILABLE_BUFFER_MINUTES * MINUTE_MS ? "AVAILABLE" : "EMPTY";
-}
 
 export function remainingSeconds(target: Date, now: Date = new Date()): number {
   return Math.max(0, Math.round((target.getTime() - now.getTime()) / 1000));

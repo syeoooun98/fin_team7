@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogoutButton } from "./LogoutButton";
 
 const NAV_ITEMS = [
   { href: "/", label: "대시보드" },
@@ -14,7 +15,8 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function NavBar() {
+/** 로그인 여부에 따라 로그인/회원가입 링크 또는 계정 정보+로그아웃을 보여준다. */
+export function NavBar({ studentId }: { studentId: string | null }) {
   const pathname = usePathname();
 
   return (
@@ -46,6 +48,24 @@ export function NavBar() {
             );
           })}
         </nav>
+
+        <div className="flex shrink-0 items-center gap-3 text-sm font-medium">
+          {studentId ? (
+            <>
+              <span className="text-foreground-subtle">{studentId}</span>
+              <LogoutButton />
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="text-foreground-muted hover:text-foreground">
+                로그인
+              </Link>
+              <Link href="/signup" className="font-semibold text-brand hover:opacity-80">
+                회원가입
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );

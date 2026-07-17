@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+
+const SUCCESS_DISPLAY_MS = 2000;
 
 interface ReportConfirmModalProps {
   open: boolean;
@@ -14,13 +16,16 @@ interface ReportConfirmModalProps {
 /**
  * design.md 4.6 — 신고 확인 모달.
  * 중복 신고 거부(F13) 같은 동기적 피드백은 토스트가 아니라 이 모달 안에 바로 표시한다(design.md 5절).
+ * 신고 접수 성공 시에는 "신고가 완료되었습니다." 안내를 2초간 보여준 뒤 자동으로 닫는다.
  */
 export function ReportConfirmModal({ open, onClose, onSubmit }: ReportConfirmModalProps) {
   const [rejection, setRejection] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const handleClose = () => {
     setRejection(null);
+    setSubmitted(false);
     onClose();
   };
 
@@ -29,15 +34,26 @@ export function ReportConfirmModal({ open, onClose, onSubmit }: ReportConfirmMod
     const result = await onSubmit();
     setSubmitting(false);
     if (result.accepted) {
-      handleClose();
+      setSubmitted(true);
     } else {
       setRejection(result.message);
     }
   };
 
+  useEffect(() => {
+    if (!submitted) return;
+    const timer = setTimeout(handleClose, SUCCESS_DISPLAY_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submitted]);
+
   return (
     <Modal open={open} onClose={handleClose} title="좌석 신고">
-      {rejection ? (
+      {submitted ? (
+        <p className="rounded-lg bg-neutral-100 p-3 text-center text-sm text-neutral-700">
+          신고가 완료되었습니다.
+        </p>
+      ) : rejection ? (
         <div className="space-y-4">
           <p className="rounded-xl bg-surface-soft p-3 text-sm text-foreground">{rejection}</p>
           <div className="flex justify-end">

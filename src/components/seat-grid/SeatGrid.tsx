@@ -19,6 +19,8 @@ interface SeatGridProps {
   onRequestAway: (seatId: number, categoryCode: AwayCategoryCode) => void;
   onReturnFromAway: (seatId: number) => void;
   onReport: (seatId: number) => Promise<{ accepted: boolean; message: string }>;
+  /** TODO(임시): QR 없이 테스트하기 위한 체크인 트리거. 실제 QR 연동 후 제거 */
+  onTestCheckIn?: (seatCode: string) => void;
 }
 
 /** design.md 4.3 — 구역 좌석 그리드 팝업. F17 필터, GS 룸 선택, 좌석 상세 진입을 오케스트레이션한다. */
@@ -31,6 +33,7 @@ export function SeatGrid({
   onRequestAway,
   onReturnFromAway,
   onReport,
+  onTestCheckIn,
 }: SeatGridProps) {
   const [outletOnly, setOutletOnly] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(roomNumbers?.[0] ?? null);
@@ -87,10 +90,29 @@ export function SeatGrid({
           onClose={() => setSelectedSeatId(null)}
           seat={selectedSeat}
           ownDetail={ownDetailsBySeatId[selectedSeat.id]}
-          onCheckout={() => onCheckout(selectedSeat.id)}
+          onCheckout={() => {
+            // 체크아웃 직후에는 상세 패널을 닫는다 — 안 닫으면 방금 비어 AVAILABLE이 된
+            // 같은 좌석의 "체크인" 안내가 다시 떠서 마치 재체크인 팝업처럼 보이는 버그가 있었다.
+            onCheckout(selectedSeat.id);
+            setSelectedSeatId(null);
+          }}
           onRequestAway={() => setAwayModalSeatId(selectedSeat.id)}
           onReturnFromAway={() => onReturnFromAway(selectedSeat.id)}
-          onOpenReportConfirm={() => setReportModalSeatId(selectedSeat.id)}
+          onOpenReportConfirm={() => {
+            // 신고 확인 팝업으로 넘어가는 시점에 상세 패널은 닫는다 — 그래야 신고 팝업이
+            // 취소되거나(취소 버튼) 자동으로 닫히거나(완료 후 2초) 했을 때 상세 패널로
+            // 돌아가지 않고 곧장 좌석 배치도로 복귀한다.
+            setSelectedSeatId(null);
+            setReportModalSeatId(selectedSeat.id);
+          }}
+          onTestCheckIn={
+            onTestCheckIn
+              ? () => {
+                  onTestCheckIn(selectedSeat.seatCode);
+                  setSelectedSeatId(null);
+                }
+              : undefined
+          }
         />
       )}
 

@@ -15,7 +15,7 @@ interface FloorZoneGroupProps {
  */
 export function FloorZoneGroup({ floor, zones, defaultOpen = false }: FloorZoneGroupProps) {
   const total = zones.reduce((sum, z) => sum + z.total, 0);
-  const free = zones.reduce((sum, z) => sum + z.available + z.empty, 0);
+  const free = zones.reduce((sum, z) => sum + z.available, 0);
 
   return (
     <details

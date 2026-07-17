@@ -18,8 +18,12 @@ interface ZoneMeta {
   seatCount: number;
 }
 
-// 2026-07-17 실제 2~5층 방 이름 기준. 2026-07-17(2차) 더 상세한 2F~5F.png 반영해 24개 구역으로 확장.
-// 좌석 데이터는 아직 없음(구역만 확정) — seatCount 0.
+/**
+ * 2026-07-17 실제 2~5층 방 이름 기준(1차) → 2026-07-17(2차) 더 상세한 2F~5F.png 반영해 24개 구역으로 확장.
+ * 실제 Supabase DB의 zones 테이블과 동일(DB.md 2.2절). seatCount는 전부 0 — 실제 좌석 수가
+ * 아직 미정(TBD)이라 임의로 채우지 않았다. 실측 좌석 수가 확정되면 이 값과 아래
+ * buildMockSeatsForZone의 length를 함께 갱신할 것.
+ */
 export const ZONE_META: ZoneMeta[] = [
   { code: "F2F1", name: "제1자유열람실", floor: 2, seatCount: 0 },
   { code: "F2SQ", name: "메인스퀘어", floor: 2, seatCount: 0 },
@@ -59,17 +63,19 @@ function padSeatNumber(n: number) {
   return String(n).padStart(3, "0");
 }
 
-/** 데모용 결정적(비-랜덤) 상태 분배 — 인덱스를 5로 나눈 나머지로 상태를 순환시킨다 */
+/** 데모용 결정적(비-랜덤) 상태 분배 — 인덱스를 3으로 나눈 나머지로 상태를 순환시킨다 */
 function statusForIndex(i: number): { status: PublicSeatView["status"]; isAway: boolean } {
-  const cycle = i % 5;
+  const cycle = i % 3;
   if (cycle === 0) return { status: "AVAILABLE", isAway: false };
-  if (cycle === 1) return { status: "EMPTY", isAway: false };
-  if (cycle === 2) return { status: "OCCUPIED", isAway: false };
-  if (cycle === 3) return { status: "OCCUPIED", isAway: true };
-  return { status: "AVAILABLE", isAway: false };
+  if (cycle === 1) return { status: "OCCUPIED", isAway: false };
+  return { status: "OCCUPIED", isAway: true };
 }
 
-/** 구역만 확정되고 실제 좌석 배치는 아직 없어서(seatCount 0) 항상 빈 배열을 반환한다. */
+/**
+ * 구역만 확정되고 실제 좌석 배치는 아직 없어서(seatCount 0) 항상 빈 배열을 반환한다.
+ * 현재 24개 구역 중 room_number 기반 그룹핑(구 GS 방식)이 필요한 곳은 없다 — 향후 그런
+ * 구역이 추가되면 room_number를 채워 넣는 분기를 여기 다시 추가하면 된다.
+ */
 export function buildMockSeatsForZone(zoneCode: ZoneCode): PublicSeatView[] {
   const meta = ZONE_META.find((z) => z.code === zoneCode);
   if (!meta) return [];
@@ -85,7 +91,8 @@ export function buildMockSeatsForZone(zoneCode: ZoneCode): PublicSeatView[] {
       isWindow: false,
       status,
       isAway,
-      isMine: false,
+      isMine: i === 2, // 데모: 3번째 좌석을 "내 좌석"으로 표시
+      seatSessionId: null, // 목업 좌석이라 실제 세션이 없음
     };
   });
 }
@@ -94,7 +101,6 @@ export function buildMockDashboardSummary(): DashboardSummary {
   const byZone: DashboardZoneSummary[] = ZONE_META.map((meta) => {
     const seats = buildMockSeatsForZone(meta.code);
     const available = seats.filter((s) => s.status === "AVAILABLE").length;
-    const empty = seats.filter((s) => s.status === "EMPTY").length;
     const occupied = seats.filter((s) => s.status === "OCCUPIED").length;
     return {
       zoneCode: meta.code,
@@ -102,7 +108,6 @@ export function buildMockDashboardSummary(): DashboardSummary {
       floor: meta.floor,
       total: seats.length,
       available,
-      empty,
       occupied,
     };
   });
@@ -110,7 +115,6 @@ export function buildMockDashboardSummary(): DashboardSummary {
   return {
     total: byZone.reduce((sum, z) => sum + z.total, 0),
     available: byZone.reduce((sum, z) => sum + z.available, 0),
-    empty: byZone.reduce((sum, z) => sum + z.empty, 0),
     occupied: byZone.reduce((sum, z) => sum + z.occupied, 0),
     awayCount: byZone.reduce((sum, z) => sum + z.occupied, 0) / 2,
     updatedAt: "방금",
@@ -134,7 +138,9 @@ export const MOCK_MY_SEAT: OwnSeatDetail = {
   status: "OCCUPIED",
   isAway: true,
   isMine: true,
+  seatSessionId: null, // 목업 데이터라 실제 세션이 없음
   activeAway: {
+    id: 1,
     categoryCode: "CAFE",
     label: "카페",
     startedAt: new Date(Date.now() - 16 * 60_000).toISOString(),

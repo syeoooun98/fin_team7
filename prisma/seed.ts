@@ -1,12 +1,14 @@
 // 자리지킴이 — 초기 시드 데이터
-// zones/away_categories 값은 DB.md 2.2/2.4절 INSERT문, seats 생성 규칙은 PRD 6.2절 표 그대로.
+// zones 값은 실제 Supabase DB(nigefilyramspwrmobyb) 기준(PRD 6.2, 2026-07-17 갱신).
+// away_categories는 DB.md 2.4절 INSERT문 그대로.
 
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// 2026-07-17 실제 2~5층 방 이름 기준(1차). 2026-07-17(2차) 더 상세한 2F~5F.png 반영해 24개 구역으로 확장.
-// 좌석 배치는 아직 확정 전이라 seatCount 0(구역만 시드).
+// 2026-07-17 실제 2~5층 방 이름 기준(1차) → 2026-07-17(2차) 더 상세한 2F~5F.png 반영해 24개 구역으로 확장.
+// 좌석 수는 전부 0(TBD) — 실측 전까지 임의로 채우지 않는다. 확정되면 seatCount만 갱신하면
+// buildSeatsForZone이 그만큼 좌석을 생성한다.
 const ZONES = [
   { code: "F2F1", name: "제1자유열람실", floor: 2, colorRef: "coral", description: null, seatCount: 0 },
   { code: "F2SQ", name: "메인스퀘어", floor: 2, colorRef: "teal", description: null, seatCount: 0 },
@@ -46,6 +48,10 @@ function padSeatNumber(n: number) {
   return String(n).padStart(3, "0");
 }
 
+/**
+ * 현재 어떤 구역도 room_number 기반 그룹핑(구 GS 방식)이 필요하지 않다 — 향후 방 단위
+ * 구조를 가진 구역이 추가되면 그 코드만 분기해서 room_number를 채우면 된다.
+ */
 function buildSeatsForZone(zoneCode: (typeof ZONES)[number]["code"], seatCount: number) {
   return Array.from({ length: seatCount }, (_, i) => ({
     seatCode: `${zoneCode}-${padSeatNumber(i + 1)}`,
@@ -88,7 +94,7 @@ async function main() {
   }
 
   const seatTotal = await prisma.seat.count();
-  console.log(`시드 완료: 구역 ${ZONES.length}개, 좌석 ${seatTotal}석 (좌석 배치 확정 전이라 0석 예상)`);
+  console.log(`시드 완료: 구역 ${ZONES.length}개, 좌석 ${seatTotal}석 (좌석 수 TBD — 실측 후 ZONES.seatCount 갱신 필요)`);
 }
 
 main()

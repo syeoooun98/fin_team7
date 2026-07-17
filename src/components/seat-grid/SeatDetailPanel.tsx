@@ -14,6 +14,12 @@ interface SeatDetailPanelProps {
   onReturnFromAway: () => void;
   /** 실제 신고 처리는 하지 않는다 — 확인 모달(ReportConfirmModal)을 여는 것까지만(design.md 4.6) */
   onOpenReportConfirm: () => void;
+  /**
+   * TODO(임시): PRD 2.3상 체크인은 QR 스캔 전용이라 원래 앱 내 버튼이 없어야 한다.
+   * 물리 QR/스캐너가 준비되기 전까지 기능 테스트를 위해서만 제공하는 트리거 — 제공되면
+   * "테스트" 라벨이 붙은 버튼을 노출한다. QR 연동 후 이 prop과 버튼을 제거할 것.
+   */
+  onTestCheckIn?: () => void;
 }
 
 /**
@@ -30,14 +36,22 @@ export function SeatDetailPanel({
   onRequestAway,
   onReturnFromAway,
   onOpenReportConfirm,
+  onTestCheckIn,
 }: SeatDetailPanelProps) {
   return (
     <Modal open={open} onClose={onClose} title={seat.seatCode}>
       <div className="space-y-3 text-sm text-foreground-muted">
-        {(seat.status === "AVAILABLE" || seat.status === "EMPTY") && (
-          <p className="rounded-xl border border-border-subtle bg-surface-soft p-3 leading-relaxed">
-            이 자리에 부착된 QR 코드를 폰으로 스캔해 체크인하세요. (현장 체크인만 지원, PRD 2.3)
-          </p>
+        {seat.status === "AVAILABLE" && (
+          <div className="space-y-2">
+            <p className="rounded-xl border border-border-subtle bg-surface-soft p-3 leading-relaxed">
+              이 자리에 부착된 QR 코드를 폰으로 스캔해 체크인하세요. (현장 체크인만 지원, PRD 2.3)
+            </p>
+            {onTestCheckIn && (
+              <Button variant="secondary" onClick={onTestCheckIn}>
+                체크인 (테스트용, QR 없이)
+              </Button>
+            )}
+          </div>
         )}
 
         {seat.status === "OCCUPIED" && seat.isMine && !seat.isAway && (

@@ -26,13 +26,6 @@ export function DashboardSummary({ data }: { data: DashboardSummaryData }) {
       color: SEAT_STATUS_STYLE.AVAILABLE.border,
     },
     {
-      key: "empty",
-      label: SEAT_STATUS_STYLE.EMPTY.label,
-      value: data.empty,
-      bg: SEAT_STATUS_STYLE.EMPTY.bg,
-      color: SEAT_STATUS_STYLE.EMPTY.border,
-    },
-    {
       key: "occupied",
       label: SEAT_STATUS_STYLE.OCCUPIED.label,
       value: data.occupied,
@@ -57,7 +50,7 @@ export function DashboardSummary({ data }: { data: DashboardSummaryData }) {
         </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <div className="rounded-2xl border border-border-subtle bg-white p-5 shadow-[var(--shadow-card)]">
           <p className="text-sm font-medium text-foreground-muted">전체 좌석</p>
           <p className="mt-1 text-4xl font-extrabold tracking-tight text-foreground">{data.total}</p>
