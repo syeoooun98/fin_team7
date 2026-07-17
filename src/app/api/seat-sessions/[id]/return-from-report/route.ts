@@ -33,7 +33,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           userId: activeReport.reporterUserId,
           type: "REPORT_CANCELLED",
           reportId: activeReport.id,
-          message: "신고하신 좌석에 이용자가 복귀하여 자리가 비지 않습니다.",
+          message: "신고된 좌석은 자리 복귀 처리되었습니다!",
         },
       });
     }

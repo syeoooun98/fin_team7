@@ -18,13 +18,21 @@ interface ZoneMeta {
   seatCount: number;
 }
 
+/**
+ * 2026-07-17 기준 실제 Supabase DB의 zones 테이블과 동일한 9개 구역(PRD 6.2).
+ * seatCount는 전부 0 — 실제 좌석 수가 아직 미정(TBD)이라 임의로 채우지 않았다.
+ * 실측 좌석 수가 확정되면 이 값과 아래 buildMockSeatsForZone의 length를 함께 갱신할 것.
+ */
 const ZONE_META: ZoneMeta[] = [
-  { code: "CZ", name: "캐주얼 라운지 존", floor: 1, seatCount: 30 },
-  { code: "QA", name: "조용한 열람실 A", floor: 2, seatCount: 60 },
-  { code: "QB", name: "조용한 열람실 B", floor: 2, seatCount: 60 },
-  { code: "LZ", name: "노트북 존", floor: 2, seatCount: 40 },
-  { code: "OH", name: "오픈 열람홀", floor: 3, seatCount: 80 },
-  { code: "GS", name: "그룹 스터디룸", floor: 3, seatCount: 40 },
+  { code: "F2F1", name: "제1자유열람실", floor: 2, seatCount: 0 },
+  { code: "F2LB", name: "메인로비", floor: 2, seatCount: 0 },
+  { code: "F2SQ", name: "메인스퀘어", floor: 2, seatCount: 0 },
+  { code: "F3R1", name: "제1자료실", floor: 3, seatCount: 0 },
+  { code: "F3R2", name: "제2자료실", floor: 3, seatCount: 0 },
+  { code: "F4CR", name: "1인 연구 캐럴", floor: 4, seatCount: 0 },
+  { code: "F4F2", name: "제2자유열람실", floor: 4, seatCount: 0 },
+  { code: "F4FT", name: "미래인재양성센터", floor: 4, seatCount: 0 },
+  { code: "F4GR", name: "대학원 열람실", floor: 4, seatCount: 0 },
 ];
 
 export const MOCK_AWAY_CATEGORIES: AwayCategory[] = [
@@ -39,42 +47,22 @@ function padSeatNumber(n: number) {
   return String(n).padStart(3, "0");
 }
 
-/** 데모용 결정적(비-랜덤) 상태 분배 — 인덱스를 5로 나눈 나머지로 상태를 순환시킨다 */
+/** 데모용 결정적(비-랜덤) 상태 분배 — 인덱스를 3으로 나눈 나머지로 상태를 순환시킨다 */
 function statusForIndex(i: number): { status: PublicSeatView["status"]; isAway: boolean } {
-  const cycle = i % 5;
+  const cycle = i % 3;
   if (cycle === 0) return { status: "AVAILABLE", isAway: false };
-  if (cycle === 1) return { status: "EMPTY", isAway: false };
-  if (cycle === 2) return { status: "OCCUPIED", isAway: false };
-  if (cycle === 3) return { status: "OCCUPIED", isAway: true };
-  return { status: "AVAILABLE", isAway: false };
+  if (cycle === 1) return { status: "OCCUPIED", isAway: false };
+  return { status: "OCCUPIED", isAway: true };
 }
 
+/**
+ * 현재 어떤 구역도 room_number 기반 그룹핑(구 GS 방식)이 필요하지 않다 — 실제 9개 구역 중
+ * 방 단위 구조를 가진 곳이 없기 때문(PRD 6.2). 향후 그런 구역이 추가되면 room_number를
+ * 채워 넣는 분기를 여기 다시 추가하면 된다.
+ */
 export function buildMockSeatsForZone(zoneCode: ZoneCode): PublicSeatView[] {
   const meta = ZONE_META.find((z) => z.code === zoneCode);
   if (!meta) return [];
-
-  if (zoneCode === "GS") {
-    const seats: PublicSeatView[] = [];
-    let idx = 0;
-    for (let room = 1; room <= 10; room++) {
-      for (let seat = 1; seat <= 4; seat++) {
-        const { status, isAway } = statusForIndex(idx);
-        seats.push({
-          id: idx + 1,
-          seatCode: `GS-${String(room).padStart(2, "0")}-${seat}`,
-          zoneCode,
-          roomNumber: room,
-          hasOutlet: false,
-          isWindow: false,
-          status,
-          isAway,
-          isMine: idx === 2, // 데모: 3번째 좌석을 "내 좌석"으로 표시
-        });
-        idx++;
-      }
-    }
-    return seats;
-  }
 
   return Array.from({ length: meta.seatCount }, (_, i) => {
     const { status, isAway } = statusForIndex(i);
@@ -83,11 +71,12 @@ export function buildMockSeatsForZone(zoneCode: ZoneCode): PublicSeatView[] {
       seatCode: `${zoneCode}-${padSeatNumber(i + 1)}`,
       zoneCode,
       roomNumber: null,
-      hasOutlet: zoneCode === "LZ",
-      isWindow: zoneCode === "OH" && i % 7 === 0,
+      hasOutlet: false,
+      isWindow: false,
       status,
       isAway,
       isMine: i === 2, // 데모: 3번째 좌석을 "내 좌석"으로 표시
+      seatSessionId: null, // 목업 좌석이라 실제 세션이 없음
     };
   });
 }
@@ -96,7 +85,6 @@ export function buildMockDashboardSummary(): DashboardSummary {
   const byZone: DashboardZoneSummary[] = ZONE_META.map((meta) => {
     const seats = buildMockSeatsForZone(meta.code);
     const available = seats.filter((s) => s.status === "AVAILABLE").length;
-    const empty = seats.filter((s) => s.status === "EMPTY").length;
     const occupied = seats.filter((s) => s.status === "OCCUPIED").length;
     return {
       zoneCode: meta.code,
@@ -104,7 +92,6 @@ export function buildMockDashboardSummary(): DashboardSummary {
       floor: meta.floor,
       total: seats.length,
       available,
-      empty,
       occupied,
     };
   });
@@ -112,7 +99,6 @@ export function buildMockDashboardSummary(): DashboardSummary {
   return {
     total: byZone.reduce((sum, z) => sum + z.total, 0),
     available: byZone.reduce((sum, z) => sum + z.available, 0),
-    empty: byZone.reduce((sum, z) => sum + z.empty, 0),
     occupied: byZone.reduce((sum, z) => sum + z.occupied, 0),
     awayCount: byZone.reduce((sum, z) => sum + z.occupied, 0) / 2,
     updatedAt: "방금",
@@ -121,22 +107,24 @@ export function buildMockDashboardSummary(): DashboardSummary {
 }
 
 export const MOCK_NOTIFICATIONS: NotificationItem[] = [
-  { id: 1, type: "CHECKIN_COMPLETE", message: "CZ-003 좌석에 체크인했습니다.", createdAt: "10분 전", readAt: null },
+  { id: 1, type: "CHECKIN_COMPLETE", message: "F2F1-003 좌석에 체크인했습니다.", createdAt: "10분 전", readAt: null },
   { id: 2, type: "AWAY_STARTED", message: "카페(20분) 자리비움을 시작했습니다.", createdAt: "8분 전", readAt: "8분 전" },
   { id: 3, type: "AWAY_WARNING", message: "자리비움 잔여 4분 — 곧 자동 반납됩니다.", createdAt: "4분 전", readAt: null },
 ];
 
 export const MOCK_MY_SEAT: OwnSeatDetail = {
   id: 3,
-  seatCode: "CZ-003",
-  zoneCode: "CZ",
+  seatCode: "F2F1-003",
+  zoneCode: "F2F1",
   roomNumber: null,
   hasOutlet: false,
   isWindow: false,
   status: "OCCUPIED",
   isAway: true,
   isMine: true,
+  seatSessionId: null, // 목업 데이터라 실제 세션이 없음
   activeAway: {
+    id: 1,
     categoryCode: "CAFE",
     label: "카페",
     startedAt: new Date(Date.now() - 16 * 60_000).toISOString(),

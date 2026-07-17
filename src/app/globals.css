@@ -4,19 +4,20 @@
   --background: #ffffff;
   --foreground: #171717;
 
-  /* design.md 2.1 — 구역 식별 색 (맵/층 뷰 전용, 좌석 상태 색과 혼용 금지) */
+  /* design.md 2.1 — 구역 식별 색 (맵/층 뷰 전용, 좌석 상태 색과 혼용 금지). 2026-07-17: 실제 9개 구역 색상으로 갱신 */
   --zone-coral: #ff7a5c;
+  --zone-slate: #64748b;
+  --zone-teal: #2bb3a3;
   --zone-blue: #4c8dff;
   --zone-navy: #2c3e7a;
   --zone-yellow: #f5b942;
-  --zone-teal: #2bb3a3;
   --zone-green: #4caf6d;
+  --zone-pink: #ec4899;
+  --zone-purple: #a855f7;
 
-  /* design.md 2.2 — 좌석 상태 색 (전 구역 공통) */
+  /* design.md 2.2 — 좌석 상태 색 (전 구역 공통, 예약가능/이용중 2단계) */
   --seat-available-bg: #eaf7ee;
   --seat-available-border: #2e9e52;
-  --seat-empty-bg: #e8f1ff;
-  --seat-empty-border: #3b7ddb;
   --seat-occupied-bg: #f1f1f3;
   --seat-occupied-border: #6b7280;
 
@@ -34,16 +35,17 @@
   --font-mono: var(--font-geist-mono);
 
   --color-zone-coral: var(--zone-coral);
+  --color-zone-slate: var(--zone-slate);
+  --color-zone-teal: var(--zone-teal);
   --color-zone-blue: var(--zone-blue);
   --color-zone-navy: var(--zone-navy);
   --color-zone-yellow: var(--zone-yellow);
-  --color-zone-teal: var(--zone-teal);
   --color-zone-green: var(--zone-green);
+  --color-zone-pink: var(--zone-pink);
+  --color-zone-purple: var(--zone-purple);
 
   --color-seat-available-bg: var(--seat-available-bg);
   --color-seat-available-border: var(--seat-available-border);
-  --color-seat-empty-bg: var(--seat-empty-bg);
-  --color-seat-empty-border: var(--seat-empty-border);
   --color-seat-occupied-bg: var(--seat-occupied-bg);
   --color-seat-occupied-border: var(--seat-occupied-border);
 
