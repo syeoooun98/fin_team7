@@ -117,30 +117,45 @@ erDiagram
 
 > **가정**: PRD는 표시 이름(닉네임 등)을 요구하지 않으므로 넣지 않았다. 필요해지면 이후에 컬럼 추가.
 
-### 2.2 `zones` — 구역 (근거: 6.2)
+### 2.2 `zones` — 구역 (근거: 6.2. 2026-07-17 실제 2~5층 방 구조로 재설계, 같은 날 더 상세한 2F~5F.png 반영해 24개로 확장)
 
 | 컬럼 | 타입 | 제약조건 | 설명 |
 |---|---|---|---|
-| code | VARCHAR(4) | PK | `F2F1`/`F2LB`/`F2SQ`/`F3R1`/`F3R2`/`F4CR`/`F4F2`/`F4FT`/`F4GR` (2026-07-17 기준 실제 구역, PRD 6.2) |
+| code | VARCHAR(4) | PK | 24개 (2.2절 시드 데이터 참고) |
 | name | VARCHAR(50) | NOT NULL | 예: "제1자유열람실" |
-| floor | SMALLINT | NOT NULL | 2~4 |
+| floor | SMALLINT | NOT NULL | 2~5 (5층 `F4F2` 제2자유열람실은 4층에서 이어지는 복층이라 별도 구역 코드 없이 같은 코드를 씀) |
 | color_ref | VARCHAR(20) | NOT NULL | 참고 색상 식별자. 실제 팔레트는 `design.md` 소관 |
-| description | TEXT | NULL | 성격(소음/이용목적) 메모 — 현재 9개 구역 모두 미입력(TBD) |
-| seat_count | SMALLINT | NOT NULL | 6.2 표의 공식 좌석 수 (정합성 검증용 — `seats` 실카운트와 반드시 일치해야 함). 실측 전까지 전 구역 0 |
+| description | TEXT | NULL | 성격(소음/이용목적) 메모 — 실제 방별 운영 규정 확정 전이라 현재 전부 NULL(TBD) |
+| seat_count | SMALLINT | NOT NULL | 6.2 표의 공식 좌석 수 (정합성 검증용 — `seats` 실카운트와 반드시 일치해야 함). 실제 좌석 배치 확정 전이라 현재 전부 0 |
 
-**시드 데이터** (6.2절, 2026-07-17 실제 DB 반영):
+**시드 데이터** (2026-07-17 기준, 2F.png~5F.png 실측 층별 안내도 범례 1~8번 기준. 화장실/엘리베이터/비상계단 등 시설 아이콘은 구역이 아니므로 제외. 좌석 배치는 TBD — 구역만 우선 반영):
 
 ```sql
 INSERT INTO zones (code, name, floor, color_ref, description, seat_count) VALUES
-('F2F1', '제1자유열람실', 2, 'coral', NULL, 0),
-('F2LB', '메인로비', 2, 'slate', NULL, 0),
-('F2SQ', '메인스퀘어', 2, 'teal', NULL, 0),
-('F3R1', '제1자료실', 3, 'blue', NULL, 0),
-('F3R2', '제2자료실', 3, 'navy', NULL, 0),
-('F4CR', '1인 연구 캐럴', 4, 'yellow', NULL, 0),
-('F4F2', '제2자유열람실', 4, 'green', NULL, 0),
-('F4FT', '미래인재양성센터', 4, 'pink', NULL, 0),
-('F4GR', '대학원 열람실', 4, 'purple', NULL, 0);
+('F2F1', '제1자유열람실',             2, 'coral',   NULL, 0),
+('F2SQ', '메인스퀘어',               2, 'teal',    NULL, 0),
+('F2LB', '메인로비',                 2, 'slate',   NULL, 0),
+('F2CF', '컨퍼런스룸',               2, 'indigo',  NULL, 0),
+('F2MD', '미디어실',                 2, 'cyan',    NULL, 0),
+('F2LK', '락커룸',                   2, 'amber',   NULL, 0),
+('F2RS', '휴게실',                   2, 'lime',    NULL, 0),
+('F2CE', '카페',                     2, 'brown',   NULL, 0),
+('F3R1', '제1자료실',                3, 'blue',    NULL, 0),
+('F3R2', '제2자료실',                3, 'navy',    NULL, 0),
+('F3AR', '수서/정리실',              3, 'sky',     NULL, 0),
+('F3RC', '학술정보운영팀(리서치커먼스)', 3, 'violet', NULL, 0),
+('F3DR', '도서관장실',               3, 'rose',    NULL, 0),
+('F3LN', '대출실',                   3, 'emerald', NULL, 0),
+('F3MT', '회의실',                   3, 'fuchsia', NULL, 0),
+('F3SC', '악보서가',                 3, 'orange',  NULL, 0),
+('F4F2', '제2자유열람실',             4, 'green',   NULL, 0),
+('F4GR', '대학원 열람실',             4, 'purple',  NULL, 0),
+('F4CR', '1인 연구 캐럴',             4, 'yellow',  NULL, 0),
+('F4FT', '미래인재양성센터',          4, 'pink',    NULL, 0),
+('F4SM', '대학원세미나실',            4, 'teal',    NULL, 0),
+('F4RS', '휴게실',                   4, 'lime',    NULL, 0),
+('F5ED', '학술정보이용교육실',        5, 'indigo',  NULL, 0),
+('F5EX', '고시반',                   5, 'rose',    NULL, 0);
 ```
 
 > 좌석 수(seat_count)가 전부 0인 것은 임시값이 아니라 **현재 실측이 안 된 상태를 그대로 반영한 것**이다. 실측되는 대로 각 행의 `seat_count`를 갱신하고, `seats` 테이블에 해당 개수만큼 좌석을 추가하면 된다(3절 정합성 체크 쿼리로 항상 일치 여부 확인 가능).

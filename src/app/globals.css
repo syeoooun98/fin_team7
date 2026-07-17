@@ -1,19 +1,49 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* 밝고 세련된 라이트 테마 — SmartThings 레퍼런스의 "카드/타일 + 아이소메트릭 맵" 구성을
+     라이트 톤으로 재해석. 어두운 배경은 가져오지 않는다. */
+  --background: #f4f6fd;
+  --foreground: #1b1e2e;
+  --foreground-muted: #6b7280;
+  --foreground-subtle: #9aa1b4;
 
-  /* design.md 2.1 — 구역 식별 색 (맵/층 뷰 전용, 좌석 상태 색과 혼용 금지). 2026-07-17: 실제 9개 구역 색상으로 갱신 */
-  --zone-coral: #ff7a5c;
-  --zone-slate: #64748b;
-  --zone-teal: #2bb3a3;
-  --zone-blue: #4c8dff;
-  --zone-navy: #2c3e7a;
-  --zone-yellow: #f5b942;
-  --zone-green: #4caf6d;
-  --zone-pink: #ec4899;
-  --zone-purple: #a855f7;
+  --surface: #ffffff;
+  --surface-soft: #f3f5fb;
+  --border-subtle: #e6e9f5;
+  --border-strong: #d7dcef;
+
+  /* 브랜드 accent — 기존 self-ring(보라)을 그대로 브랜드 컬러로 승격해 톤을 통일한다 */
+  --brand: #7c3aed;
+  --brand-hover: #6d28d9;
+  --brand-soft: #f1ecfe;
+  --brand-soft-strong: #e4d9fd;
+
+  /* design.md 2.1 — 구역 식별 색 (맵/층 뷰 전용, 좌석 상태 색과 혼용 금지). lib/constants.ts ZONE_COLORS와 동일 값 (파스텔 네온 24개) */
+  --zone-coral: #ffafaf;
+  --zone-mint-neon: #7cf5c4;
+  --zone-sky-neon: #6fe3f5;
+  --zone-lavender: #c7b9ff;
+  --zone-periwinkle: #9db4ff;
+  --zone-violet-neon: #d9a6ff;
+  --zone-peach: #ffc98c;
+  --zone-lemon: #fde68a;
+  --zone-salmon: #ff9eae;
+  --zone-turquoise: #5eead4;
+  --zone-baby-blue: #8fc1ff;
+  --zone-light-green: #9bf6c4;
+  --zone-fuchsia-neon: #f3a8ff;
+  --zone-rose: #ffa6b8;
+  --zone-lime: #c6f76b;
+  --zone-tangerine: #ffbe7b;
+  --zone-indigo-lavender: #b4b8ff;
+  --zone-aqua-neon: #6fe9e1;
+  --zone-purple: #c9aeff;
+  --zone-yellow-neon: #fce96a;
+  --zone-hot-pink: #ffa8d8;
+  --zone-green-neon: #93f7a8;
+  --zone-sky-blue: #83d9ff;
+  --zone-magenta-violet: #e29cff;
 
   /* design.md 2.2 — 좌석 상태 색 (전 구역 공통, 예약가능/이용중 2단계) */
   --seat-available-bg: #eaf7ee;
@@ -26,23 +56,53 @@
   --neutral-info: #6b7280;
   --danger-muted: #d9534f;
   --self-ring: #7c3aed;
+
+  --shadow-card: 0 1px 2px rgba(27, 30, 46, 0.04), 0 12px 28px -16px rgba(43, 45, 90, 0.16);
+  --shadow-pop: 0 24px 48px -20px rgba(43, 45, 90, 0.32);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
+  --color-surface: var(--surface);
+  --color-surface-soft: var(--surface-soft);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-soft-strong: var(--brand-soft-strong);
+
   --color-zone-coral: var(--zone-coral);
-  --color-zone-slate: var(--zone-slate);
-  --color-zone-teal: var(--zone-teal);
-  --color-zone-blue: var(--zone-blue);
-  --color-zone-navy: var(--zone-navy);
-  --color-zone-yellow: var(--zone-yellow);
-  --color-zone-green: var(--zone-green);
-  --color-zone-pink: var(--zone-pink);
+  --color-zone-mint-neon: var(--zone-mint-neon);
+  --color-zone-sky-neon: var(--zone-sky-neon);
+  --color-zone-lavender: var(--zone-lavender);
+  --color-zone-periwinkle: var(--zone-periwinkle);
+  --color-zone-violet-neon: var(--zone-violet-neon);
+  --color-zone-peach: var(--zone-peach);
+  --color-zone-lemon: var(--zone-lemon);
+  --color-zone-salmon: var(--zone-salmon);
+  --color-zone-turquoise: var(--zone-turquoise);
+  --color-zone-baby-blue: var(--zone-baby-blue);
+  --color-zone-light-green: var(--zone-light-green);
+  --color-zone-fuchsia-neon: var(--zone-fuchsia-neon);
+  --color-zone-rose: var(--zone-rose);
+  --color-zone-lime: var(--zone-lime);
+  --color-zone-tangerine: var(--zone-tangerine);
+  --color-zone-indigo-lavender: var(--zone-indigo-lavender);
+  --color-zone-aqua-neon: var(--zone-aqua-neon);
   --color-zone-purple: var(--zone-purple);
+  --color-zone-yellow-neon: var(--zone-yellow-neon);
+  --color-zone-hot-pink: var(--zone-hot-pink);
+  --color-zone-green-neon: var(--zone-green-neon);
+  --color-zone-sky-blue: var(--zone-sky-blue);
+  --color-zone-magenta-violet: var(--zone-magenta-violet);
 
   --color-seat-available-bg: var(--seat-available-bg);
   --color-seat-available-border: var(--seat-available-border);
@@ -57,8 +117,43 @@
 
 /* design.md 2.3: v1은 라이트 테마 단일 — PRD에 다크모드 요구사항이 없어 의도적으로 다크 variant를 두지 않는다 */
 
+* {
+  border-color: var(--border-subtle);
+}
+
+html {
+  color-scheme: light;
+}
+
 body {
-  background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--background);
+  /* SmartThings 레퍼런스의 은은한 컬러 글로우 배경을 라이트 톤으로 재해석 */
+  background-image:
+    radial-gradient(900px 480px at 8% -10%, rgba(124, 58, 237, 0.10), transparent 60%),
+    radial-gradient(760px 420px at 100% 0%, rgba(76, 141, 255, 0.10), transparent 55%),
+    radial-gradient(640px 360px at 50% 100%, rgba(43, 179, 163, 0.08), transparent 60%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+::selection {
+  background: var(--brand-soft-strong);
+  color: var(--brand-hover);
+}
+
+/* 얇고 눈에 덜 띄는 스크롤바 — 카드/그리드 내부 스크롤 영역용 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border-radius: 999px;
 }

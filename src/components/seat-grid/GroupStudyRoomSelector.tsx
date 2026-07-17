@@ -9,15 +9,15 @@ export function GroupStudyRoomSelector({
   onSelect: (room: number) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5 rounded-full border border-border-subtle bg-surface-soft p-1">
       {roomNumbers.map((room) => (
         <button
           key={room}
           onClick={() => onSelect(room)}
-          className={`rounded-md px-3 py-1 text-sm ${
+          className={`rounded-full px-3 py-1 text-sm font-medium transition ${
             selectedRoom === room
-              ? "bg-neutral-900 text-white"
-              : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+              ? "bg-brand text-white shadow-[0_2px_8px_-2px_rgba(124,58,237,0.6)]"
+              : "text-foreground-muted hover:text-foreground"
           }`}
         >
           {String(room).padStart(2, "0")}호

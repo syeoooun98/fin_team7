@@ -40,16 +40,33 @@ PRD 6절/7절이 이미 "9개 구역(좌석 수 TBD)", "좌석 상태 2종 + 이
 | 구역 코드 | 구역명 | 토큰명 | HEX | 용도 |
 |---|---|---|---|---|
 | F2F1 | 제1자유열람실 | `zone-coral` | `#FF7A5C` | 2층 공간 배경/식별 |
-| F2LB | 메인로비 | `zone-slate` | `#64748B` | 2층 공간 배경/식별 |
-| F2SQ | 메인스퀘어 | `zone-teal` | `#2BB3A3` | 2층 공간 배경/식별 |
-| F3R1 | 제1자료실 | `zone-blue` | `#4C8DFF` | 3층 공간 배경/식별 |
-| F3R2 | 제2자료실 | `zone-navy` | `#2C3E7A` | 3층 공간 배경/식별 (F3R1과 톤 구분 위해 채도↓명도↓) |
-| F4CR | 1인 연구 캐럴 | `zone-yellow` | `#F5B942` | 4층 공간 배경/식별 |
-| F4F2 | 제2자유열람실 | `zone-green` | `#4CAF6D` | 4층 공간 배경/식별 |
-| F4FT | 미래인재양성센터 | `zone-pink` | `#EC4899` | 4층 공간 배경/식별 |
-| F4GR | 대학원 열람실 | `zone-purple` | `#A855F7` | 4층 공간 배경/식별. **주의**: 2.3절 `self-ring`(`#7C3AED`, "내 좌석" 강조 테두리)과 색상군이 가까우니 실 구현 시 나란히 놓고 대비 재검증할 것 |
+| F2SQ | 메인스퀘어 | `zone-sky-neon` | `#6FE3F5` | 2층 공간 배경/식별 |
+| F2LB | 메인로비 | `zone-lavender` | `#C7B9FF` | 2층 공간 배경/식별 |
+| F2CF | 컨퍼런스룸 | `zone-periwinkle` | `#9DB4FF` | 2층 공간 배경/식별 |
+| F2MD | 미디어실 | `zone-violet-neon` | `#D9A6FF` | 2층 공간 배경/식별 |
+| F2LK | 락커룸 | `zone-peach` | `#FFC98C` | 2층 공간 배경/식별 |
+| F2RS | 휴게실 | `zone-lemon` | `#FDE68A` | 2층 공간 배경/식별 |
+| F2CE | 카페 | `zone-salmon` | `#FF9EAE` | 2층 공간 배경/식별 |
+| F3R1 | 제1자료실 | `zone-turquoise` | `#5EEAD4` | 3층 공간 배경/식별 |
+| F3R2 | 제2자료실 | `zone-baby-blue` | `#8FC1FF` | 3층 공간 배경/식별 (F3R1과 톤 구분 위해 채도↓명도↓) |
+| F3AR | 수서/정리실 | `zone-light-green` | `#9BF6C4` | 3층 공간 배경/식별 |
+| F3RC | 학술정보운영팀(리서치커먼스) | `zone-fuchsia-neon` | `#F3A8FF` | 3층 공간 배경/식별 |
+| F3DR | 도서관장실 | `zone-rose` | `#FFA6B8` | 3층 공간 배경/식별 |
+| F3LN | 대출실 | `zone-lime` | `#C6F76B` | 3층 공간 배경/식별 |
+| F3MT | 회의실 | `zone-tangerine` | `#FFBE7B` | 3층 공간 배경/식별 |
+| F3SC | 악보서가 | `zone-indigo-lavender` | `#B4B8FF` | 3층 공간 배경/식별 |
+| F4F2 | 제2자유열람실 | `zone-aqua-neon` | `#6FE9E1` | 4~5층 공간 배경/식별 (복층 — 5층 뷰에도 같은 색/코드로 표시) |
+| F4GR | 대학원 열람실 | `zone-purple` | `#C9AEFF` | 4층 공간 배경/식별. **주의**: 2.3절 `self-ring`(`#7C3AED`, "내 좌석" 강조 테두리)과 색상군이 가까우니 실 구현 시 나란히 놓고 대비 재검증할 것 |
+| F4CR | 1인 연구 캐럴 | `zone-yellow-neon` | `#FCE96A` | 4층 공간 배경/식별 |
+| F4FT | 미래인재양성센터 | `zone-hot-pink` | `#FFA8D8` | 4층 공간 배경/식별 |
+| F4SM | 대학원세미나실 | `zone-green-neon` | `#93F7A8` | 4층 공간 배경/식별 |
+| F4RS | 휴게실 | `zone-coral` | `#FFAFAF` | 4층 공간 배경/식별 |
+| F5ED | 학술정보이용교육실 | `zone-sky-blue` | `#83D9FF` | 5층 공간 배경/식별 |
+| F5EX | 고시반 | `zone-magenta-violet` | `#E29CFF` | 5층 공간 배경/식별 |
 
-> 9개 색 모두 배경색(20% opacity 워시)과 강조선(100% opacity, 구역 라벨/보더) 두 가지 톤으로 사용한다. 인접한 F3R1/F3R2 같은 동일 층 구역끼리 배경톤이 혼동되지 않도록 최종 값은 실 구현 시 대비 검증(APCA 또는 WCAG contrast checker)을 거친다. (2026-07-17: 기존 6개 가상 구역 → 실제 9개 구역으로 전면 교체)
+> 24개 색 모두 배경색(20% opacity 워시)과 강조선(100% opacity, 구역 라벨/보더) 두 가지 톤으로 사용한다. 인접한 구역끼리, 그리고 F3R1/F3R2 같은 동일 층 구역끼리 배경톤이 혼동되지 않도록 최종 값은 실 구현 시 대비 검증(APCA 또는 WCAG contrast checker)을 거친다.
+>
+> 2026-07-17: 기존 1~3층 가상 구역(CZ/QA/QB/LZ/OH/GS)을 실제 2~5층 방 이름 기준 9개로 전면 교체 → 같은 날 더 상세한 2F~5F.png 반영해 24개로 확장, 파스텔 네온 톤으로 재조정.
 
 ### 2.2 좌석 상태 색 (전 구역 공통, 구역 색과 독립)
 

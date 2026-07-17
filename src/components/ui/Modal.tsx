@@ -20,15 +20,15 @@ export function Modal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center">
-      <div className="w-full max-w-md rounded-t-2xl bg-white p-5 shadow-xl sm:rounded-2xl">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-semibold">{title}</h2>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur-sm p-0 sm:items-center sm:p-4">
+      <div className="w-full max-w-md rounded-t-3xl border border-border-subtle bg-white p-5 shadow-[0_24px_48px_-20px_rgba(43,45,90,0.32)] sm:rounded-3xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-base font-bold text-foreground">{title}</h2>
           {dismissible && (
             <button
               onClick={onClose}
               aria-label="닫기"
-              className="text-neutral-400 hover:text-neutral-700"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-foreground-subtle transition hover:bg-surface-soft hover:text-foreground"
             >
               ✕
             </button>
