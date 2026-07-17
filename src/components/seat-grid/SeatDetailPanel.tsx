@@ -41,6 +41,13 @@ export function SeatDetailPanel({
   return (
     <Modal open={open} onClose={onClose} title={seat.seatCode}>
       <div className="space-y-3 text-sm text-neutral-700">
+        {seat.status === "OCCUPIED" && seat.occupantBadge && (
+          <p className="flex items-center gap-1.5 text-xs text-neutral-500">
+            <span className="text-base">{seat.occupantBadge.icon}</span>
+            {seat.isMine ? "내가 장착한 칭호" : "이 자리 이용자의 칭호"}: {seat.occupantBadge.title}
+          </p>
+        )}
+
         {seat.status === "AVAILABLE" && (
           <div className="space-y-2">
             <p>이 자리에 부착된 QR 코드를 폰으로 스캔해 체크인하세요. (현장 체크인만 지원, PRD 2.3)</p>
@@ -65,7 +72,7 @@ export function SeatDetailPanel({
           <AwayCountdown
             categoryLabel={ownDetail.activeAway.label}
             limitMinutes={ownDetail.activeAway.limitMinutes}
-            remainingSeconds={ownDetail.activeAway.remainingSeconds}
+            startedAt={ownDetail.activeAway.startedAt}
             onReturn={onReturnFromAway}
           />
         )}

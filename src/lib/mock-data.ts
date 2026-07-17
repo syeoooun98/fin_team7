@@ -77,6 +77,7 @@ export function buildMockSeatsForZone(zoneCode: ZoneCode): PublicSeatView[] {
       isAway,
       isMine: i === 2, // 데모: 3번째 좌석을 "내 좌석"으로 표시
       seatSessionId: null, // 목업 좌석이라 실제 세션이 없음
+      occupantBadge: null,
     };
   });
 }
@@ -123,6 +124,7 @@ export const MOCK_MY_SEAT: OwnSeatDetail = {
   isAway: true,
   isMine: true,
   seatSessionId: null, // 목업 데이터라 실제 세션이 없음
+  occupantBadge: null,
   activeAway: {
     id: 1,
     categoryCode: "CAFE",

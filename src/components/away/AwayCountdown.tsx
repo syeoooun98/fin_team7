@@ -1,5 +1,8 @@
+"use client";
+
 import { Button } from "@/components/ui/Button";
 import { SEMANTIC_COLORS, WARNING_THRESHOLD_RATIO } from "@/lib/constants";
+import { useRemainingSeconds } from "@/lib/useRemainingSeconds";
 
 function formatMinutesSeconds(totalSeconds: number) {
   const m = Math.floor(totalSeconds / 60);
@@ -11,14 +14,15 @@ function formatMinutesSeconds(totalSeconds: number) {
 export function AwayCountdown({
   categoryLabel,
   limitMinutes,
-  remainingSeconds,
+  startedAt,
   onReturn,
 }: {
   categoryLabel: string;
   limitMinutes: number;
-  remainingSeconds: number;
+  startedAt: string;
   onReturn: () => void;
 }) {
+  const remainingSeconds = useRemainingSeconds(startedAt, limitMinutes);
   const totalSeconds = limitMinutes * 60;
   const remainingRatio = totalSeconds > 0 ? remainingSeconds / totalSeconds : 0;
   const isWarning = remainingRatio <= WARNING_THRESHOLD_RATIO;

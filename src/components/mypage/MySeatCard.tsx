@@ -30,7 +30,7 @@ export function MySeatCard({
         <AwayCountdown
           categoryLabel={seat.activeAway.label}
           limitMinutes={seat.activeAway.limitMinutes}
-          remainingSeconds={seat.activeAway.remainingSeconds}
+          startedAt={seat.activeAway.startedAt}
           onReturn={onReturnFromAway}
         />
       )}
