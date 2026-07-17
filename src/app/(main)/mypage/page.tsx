@@ -46,7 +46,8 @@ export default function MyPage() {
       <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
         <div className="min-w-0 flex-1 space-y-8">
           <div>
-            <h1 className="mb-3 text-xl font-bold">내 좌석</h1>
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand">My Page</p>
+            <h1 className="mb-3 text-2xl font-bold text-foreground">내 좌석</h1>
             <MySeatCard
               seat={seat}
               onCheckout={async () => {
@@ -69,9 +70,11 @@ export default function MyPage() {
             />
           </div>
 
-          <div>
-            <h2 className="mb-3 text-lg font-semibold">알림</h2>
-            <NotificationList notifications={notifications} />
+          <div className="space-y-3">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground-muted">알림</h2>
+            <div className="rounded-2xl border border-border-subtle bg-white p-2 shadow-[var(--shadow-card)] sm:p-4">
+              <NotificationList notifications={notifications} />
+            </div>
           </div>
         </div>
 

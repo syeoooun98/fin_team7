@@ -1,27 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { FloorView } from "./FloorView";
+import { useState } from "react";
+import { IsometricFloorPlan } from "./IsometricFloorPlan";
 import type { DashboardZoneSummary } from "@/lib/types";
 
-/**
- * design.md 4.1 — 3D 아이소메트릭 도서관 맵(건물 전체 뷰)의 자리표시자.
- * TODO: 실제 3D/아이소메트릭 일러스트 에셋은 design.md 9절 오픈 이슈 1번 결정 후 교체.
- * 지금은 층 탭 + 층별 구역 카드로 동일한 정보 구조(건물 → 층 → 구역)를 먼저 동작시킨다.
- */
-export function IsometricBuildingMap({ zones }: { zones: DashboardZoneSummary[] }) {
-  const floors = useMemo(
-    () => Array.from(new Set(zones.map((z) => z.floor))).sort((a, b) => a - b),
-    [zones],
-  );
-  const [selectedFloor, setSelectedFloor] = useState(floors[0] ?? 1);
+const FLOORS = [2, 3, 4, 5];
 
-  const zonesOnFloor = zones.filter((z) => z.floor === selectedFloor);
+/** design.md 4.1 — 3D 아이소메트릭 도서관 맵(건물 전체 뷰). 층 탭 + 층별 3D 구조도. */
+export function IsometricBuildingMap({ zones }: { zones: DashboardZoneSummary[] }) {
+  const [selectedFloor, setSelectedFloor] = useState(FLOORS[0]);
 
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
-        {floors.map((floor) => (
+        {FLOORS.map((floor) => (
           <button
             key={floor}
             onClick={() => setSelectedFloor(floor)}
@@ -35,7 +27,8 @@ export function IsometricBuildingMap({ zones }: { zones: DashboardZoneSummary[] 
           </button>
         ))}
       </div>
-      <FloorView zones={zonesOnFloor} />
+      {/* key로 층 전환 시 Canvas/카메라를 새로 마운트해 이전 층의 시점 상태가 남지 않게 한다. */}
+      <IsometricFloorPlan key={selectedFloor} floor={selectedFloor} zoneSummaries={zones} />
     </div>
   );
 }

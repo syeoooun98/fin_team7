@@ -2,22 +2,32 @@
 // Prisma 생성 타입을 클라이언트 컴포넌트에서 직접 import하지 않기 위해,
 // DB.md 스키마를 그대로 옮긴 순수 TS 타입을 별도로 둔다.
 
-/**
- * 2026-07-17 기준 실제 Supabase DB(zones 테이블)와 동일 — PRD 6.2절 참고.
- * "TEST"는 실좌석 수 확정 전 기능 테스트용 임시 구역 — 실제 9개 구역이 아니며,
- * 테스트가 끝나면 DB와 함께 이 타입에서도 제거할 것.
- */
+/** 2026-07-17 기준 실제 2~5층 안내도(2F~5F.png) 반영 24개 구역 — DB.md 2.2절 참고. */
 export type ZoneCode =
   | "F2F1"
-  | "F2LB"
   | "F2SQ"
+  | "F2LB"
+  | "F2CF"
+  | "F2MD"
+  | "F2LK"
+  | "F2RS"
+  | "F2CE"
   | "F3R1"
   | "F3R2"
-  | "F4CR"
+  | "F3AR"
+  | "F3RC"
+  | "F3DR"
+  | "F3LN"
+  | "F3MT"
+  | "F3SC"
   | "F4F2"
-  | "F4FT"
   | "F4GR"
-  | "TEST";
+  | "F4CR"
+  | "F4FT"
+  | "F4SM"
+  | "F4RS"
+  | "F5ED"
+  | "F5EX";
 
 export type SeatStatus = "AVAILABLE" | "OCCUPIED";
 

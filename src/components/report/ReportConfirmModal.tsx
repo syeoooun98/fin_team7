@@ -55,7 +55,7 @@ export function ReportConfirmModal({ open, onClose, onSubmit }: ReportConfirmMod
         </p>
       ) : rejection ? (
         <div className="space-y-4">
-          <p className="rounded-lg bg-neutral-100 p-3 text-sm text-neutral-700">{rejection}</p>
+          <p className="rounded-xl bg-surface-soft p-3 text-sm text-foreground">{rejection}</p>
           <div className="flex justify-end">
             <Button variant="secondary" onClick={handleClose}>
               닫기
@@ -64,9 +64,9 @@ export function ReportConfirmModal({ open, onClose, onSubmit }: ReportConfirmMod
         </div>
       ) : (
         <>
-          <p className="mb-4 text-sm text-neutral-700">
-            이 좌석에 대해 장시간 부재를 신고하시겠어요? (상대방에게는
-            신고자 정보가 전달되지 않습니다.)
+          <p className="mb-4 text-sm leading-relaxed text-foreground-muted">
+            이 좌석에 대해 장시간 부재를 신고하시겠어요? 신고는 익명으로 처리되며, 상대방에게는
+            신고자 정보가 전달되지 않습니다.
           </p>
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={handleClose} disabled={submitting}>

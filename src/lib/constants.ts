@@ -1,22 +1,33 @@
 // 자리지킴이 — design.md 2절 컬러 토큰 및 PRD 확정 상수값
 import type { AwayCategoryCode, SeatStatus, ZoneCode } from "./types";
 
-/**
- * design.md 2.1 — 구역 식별 색. 좌석 상태 색과 절대 섞어 쓰지 않는다(맵 레벨 전용).
- * 2026-07-17: 실제 Supabase DB의 zones.color_ref 값과 1:1 매핑되도록 교체(PRD 6.2).
- */
+/** design.md 2.1 — 구역 식별 색. 좌석 상태 색과 절대 섞어 쓰지 않는다(맵 레벨 전용). */
+// 파스텔 네온 톤(채도를 낮춘 밝은 톤이지만 선명하게 도드라지는 형광 계열) 24개 확정값.
 export const ZONE_COLORS: Record<ZoneCode, { token: string; hex: string }> = {
-  F2F1: { token: "zone-coral", hex: "#FF7A5C" },
-  F2LB: { token: "zone-slate", hex: "#64748B" },
-  F2SQ: { token: "zone-teal", hex: "#2BB3A3" },
-  F3R1: { token: "zone-blue", hex: "#4C8DFF" },
-  F3R2: { token: "zone-navy", hex: "#2C3E7A" },
-  F4CR: { token: "zone-yellow", hex: "#F5B942" },
-  F4F2: { token: "zone-green", hex: "#4CAF6D" },
-  F4FT: { token: "zone-pink", hex: "#EC4899" },
-  F4GR: { token: "zone-purple", hex: "#A855F7" },
-  // 기능 테스트용 임시 구역 — 실제 구역 색상표가 아님
-  TEST: { token: "zone-coral", hex: "#FF7A5C" },
+  F2F1: { token: "zone-mint-neon", hex: "#7CF5C4" },
+  F2SQ: { token: "zone-sky-neon", hex: "#6FE3F5" },
+  F2LB: { token: "zone-lavender", hex: "#C7B9FF" },
+  F2CF: { token: "zone-periwinkle", hex: "#9DB4FF" },
+  F2MD: { token: "zone-violet-neon", hex: "#D9A6FF" },
+  F2LK: { token: "zone-peach", hex: "#FFC98C" },
+  F2RS: { token: "zone-lemon", hex: "#FDE68A" },
+  F2CE: { token: "zone-salmon", hex: "#FF9EAE" },
+  F3R1: { token: "zone-turquoise", hex: "#5EEAD4" },
+  F3R2: { token: "zone-baby-blue", hex: "#8FC1FF" },
+  F3AR: { token: "zone-light-green", hex: "#9BF6C4" },
+  F3RC: { token: "zone-fuchsia-neon", hex: "#F3A8FF" },
+  F3DR: { token: "zone-rose", hex: "#FFA6B8" },
+  F3LN: { token: "zone-lime", hex: "#C6F76B" },
+  F3MT: { token: "zone-tangerine", hex: "#FFBE7B" },
+  F3SC: { token: "zone-indigo-lavender", hex: "#B4B8FF" },
+  F4F2: { token: "zone-aqua-neon", hex: "#6FE9E1" },
+  F4GR: { token: "zone-purple", hex: "#C9AEFF" },
+  F4CR: { token: "zone-yellow-neon", hex: "#FCE96A" },
+  F4FT: { token: "zone-hot-pink", hex: "#FFA8D8" },
+  F4SM: { token: "zone-green-neon", hex: "#93F7A8" },
+  F4RS: { token: "zone-coral", hex: "#FFAFAF" },
+  F5ED: { token: "zone-sky-blue", hex: "#83D9FF" },
+  F5EX: { token: "zone-magenta-violet", hex: "#E29CFF" },
 };
 
 /** design.md 2.2 — 좌석 상태 색 (전 구역 공통, 2단계: 예약가능/이용중 + 이용중 하위 외출 배지). 색 + 아이콘 + 라벨 3중 표현 원칙 필수. */

@@ -15,7 +15,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <NavBar studentId={user?.studentId ?? null} />
       <NotificationToastHost />
       {user && <ReportGateModal />}
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">{children}</main>
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
     </div>
   );
 }

@@ -40,9 +40,9 @@ export function SeatDetailPanel({
 }: SeatDetailPanelProps) {
   return (
     <Modal open={open} onClose={onClose} title={seat.seatCode}>
-      <div className="space-y-3 text-sm text-neutral-700">
+      <div className="space-y-3 text-sm text-foreground-muted">
         {seat.status === "OCCUPIED" && seat.occupantBadge && (
-          <p className="flex items-center gap-1.5 text-xs text-neutral-500">
+          <p className="flex items-center gap-1.5 text-xs text-foreground-subtle">
             <span className="text-base">{seat.occupantBadge.icon}</span>
             {seat.isMine ? "내가 장착한 칭호" : "이 자리 이용자의 칭호"}: {seat.occupantBadge.title}
           </p>
@@ -50,7 +50,9 @@ export function SeatDetailPanel({
 
         {seat.status === "AVAILABLE" && (
           <div className="space-y-2">
-            <p>이 자리에 부착된 QR 코드를 폰으로 스캔해 체크인하세요. (현장 체크인만 지원, PRD 2.3)</p>
+            <p className="rounded-xl border border-border-subtle bg-surface-soft p-3 leading-relaxed">
+              이 자리에 부착된 QR 코드를 폰으로 스캔해 체크인하세요. (현장 체크인만 지원, PRD 2.3)
+            </p>
             {onTestCheckIn && (
               <Button variant="secondary" onClick={onTestCheckIn}>
                 체크인 (테스트용, QR 없이)
@@ -78,7 +80,7 @@ export function SeatDetailPanel({
         )}
 
         {seat.status === "OCCUPIED" && seat.isMine && ownDetail?.activeReport && (
-          <p className="rounded-lg bg-amber-50 p-3 text-amber-900">
+          <p className="rounded-xl border border-warn-amber/30 bg-amber-50 p-3 text-amber-900">
             누군가 이 좌석의 장시간 부재를 신고했습니다. 60분 내 복귀하지 않으면 자동
             반납됩니다. (신고자 정보는 제공되지 않습니다)
           </p>
@@ -91,7 +93,9 @@ export function SeatDetailPanel({
         )}
 
         {seat.status === "OCCUPIED" && !seat.isMine && seat.isAway && (
-          <p className="text-neutral-500">외출 중인 좌석입니다. (카테고리·잔여시간은 비공개, F7)</p>
+          <p className="rounded-xl border border-border-subtle bg-surface-soft p-3 text-foreground-muted">
+            외출 중인 좌석입니다. (카테고리·잔여시간은 비공개, F7)
+          </p>
         )}
       </div>
     </Modal>
