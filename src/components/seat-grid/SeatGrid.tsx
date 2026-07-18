@@ -4,9 +4,11 @@ import { useMemo, useState } from "react";
 import { SeatCell } from "./SeatCell";
 import { SeatDetailPanel } from "./SeatDetailPanel";
 import { GroupStudyRoomSelector } from "./GroupStudyRoomSelector";
+import { ZONE_SEAT_MAPS } from "./zone-layouts";
 import { AwayRequestModal } from "@/components/away/AwayRequestModal";
 import { ReportConfirmModal } from "@/components/report/ReportConfirmModal";
-import type { AwayCategory, AwayCategoryCode, OwnSeatDetail, PublicSeatView } from "@/lib/types";
+import { MOCKUP2_COLORS } from "@/app/_seatmap-mockups/SeatChip";
+import type { AwayCategory, AwayCategoryCode, OwnSeatDetail, PublicSeatView, ZoneCode } from "@/lib/types";
 
 interface SeatGridProps {
   seats: PublicSeatView[];
@@ -15,6 +17,8 @@ interface SeatGridProps {
   awayCategories: AwayCategory[];
   /** 룸 단위로 나뉜 구역에서만 전달 — 룸 선택 탭 노출용(DB.md 14.3) */
   roomNumbers?: number[];
+  /** 실측 사진대로 배치가 등록된 구역(zone-layouts/index.ts)이면 그 배치로, 아니면 기본 그리드로 렌더링 */
+  zoneCode?: ZoneCode;
   onCheckout: (seatId: number) => void;
   onRequestAway: (seatId: number, categoryCode: AwayCategoryCode) => void;
   onReturnFromAway: (seatId: number) => void;
@@ -29,6 +33,7 @@ export function SeatGrid({
   ownDetailsBySeatId,
   awayCategories,
   roomNumbers,
+  zoneCode,
   onCheckout,
   onRequestAway,
   onReturnFromAway,
@@ -72,17 +77,46 @@ export function SeatGrid({
         </label>
       </div>
 
-      {seats.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-border-strong bg-white/60 p-8 text-center text-sm text-foreground-muted">
-          아직 좌석 데이터가 등록되지 않은 구역입니다.
-        </p>
-      ) : (
-        <div className="grid grid-cols-4 gap-2.5 sm:grid-cols-6 md:grid-cols-8">
-          {visibleSeats.map((seat) => (
-            <SeatCell key={seat.id} seat={seat} onClick={() => setSelectedSeatId(seat.id)} />
-          ))}
-        </div>
-      )}
+      {(() => {
+        const ZoneSeatMap = zoneCode ? ZONE_SEAT_MAPS[zoneCode] : undefined;
+        if (seats.length === 0) {
+          return (
+            <p className="rounded-2xl border border-dashed border-border-strong bg-white/60 p-8 text-center text-sm text-foreground-muted">
+              아직 좌석 데이터가 등록되지 않은 구역입니다.
+            </p>
+          );
+        }
+        if (ZoneSeatMap) {
+          return (
+            <>
+              <div className="flex items-center justify-end gap-2 text-xs font-semibold">
+                {(["AVAILABLE", "OCCUPIED", "AWAY"] as const).map((key) => (
+                  <span
+                    key={key}
+                    className="flex items-center gap-1 rounded-full border px-3 py-1"
+                    style={{
+                      backgroundColor: MOCKUP2_COLORS[key].bg,
+                      borderColor: MOCKUP2_COLORS[key].border,
+                      color: MOCKUP2_COLORS[key].text,
+                    }}
+                  >
+                    {key === "AWAY" && <span className="text-[10px] leading-none">🚶</span>}
+                    {key === "AVAILABLE" ? "예약 가능" : key === "OCCUPIED" ? "이용중" : "이용중(외출중)"}
+                  </span>
+                ))}
+              </div>
+              <ZoneSeatMap seats={visibleSeats} onSeatClick={setSelectedSeatId} />
+            </>
+          );
+        }
+        return (
+          <div className="grid grid-cols-4 gap-2.5 sm:grid-cols-6 md:grid-cols-8">
+            {visibleSeats.map((seat) => (
+              <SeatCell key={seat.id} seat={seat} onClick={() => setSelectedSeatId(seat.id)} />
+            ))}
+          </div>
+        );
+      })()}
 
       {selectedSeat && (
         <SeatDetailPanel
