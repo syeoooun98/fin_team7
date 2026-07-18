@@ -2,11 +2,14 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSessionUserId } from "@/lib/auth";
 import { ALLOWED_PHOTO_MIME_TYPES, MAX_PHOTO_BYTES, uploadVerificationPhoto } from "@/lib/supabase-storage";
+import { getMission } from "@/lib/missions";
+import { verifyMissionPhoto } from "@/lib/photo-verification";
 
 /**
- * POST /api/verification-photos — 신고당한 본인이 "자리에 앉아서 책과 함께" 찍은 인증샷 업로드.
- * 신고 해제(return-from-report)와 분리된 순수 업로드 엔드포인트 — 반환된 photoPath를
- * 그 다음 return-from-report 호출에 실어 보내야 실제로 신고가 해제된다.
+ * POST /api/verification-photos — 신고당한 본인이 배정된 미션(lib/missions.ts)에 맞춰 찍은
+ * 인증샷 업로드. 업로드 직후 AI로 사진이 미션 조건을 만족하는지 검증하고, 통과한 경우에만
+ * Report.verifiedPhotoPath를 채운다 — return-from-report는 이 값과 일치하는 photoPath만 받는다.
+ * 신고 해제(return-from-report)와 분리된 업로드 엔드포인트다.
  */
 export async function POST(request: Request) {
   const userId = await getSessionUserId();
@@ -40,8 +43,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "진행 중인 신고를 찾을 수 없습니다." }, { status: 404 });
   }
 
+  const mission = getMission(report.missionCode);
+  if (!mission) {
+    return NextResponse.json({ message: "이 신고에 배정된 미션을 찾을 수 없습니다." }, { status: 500 });
+  }
+
   const bytes = new Uint8Array(await photo.arrayBuffer());
+  const { passed, reason } = await verifyMissionPhoto(bytes, mission);
   const photoPath = await uploadVerificationPhoto({ userId, reportId, contentType: photo.type, bytes });
 
-  return NextResponse.json({ photoPath });
+  if (passed) {
+    await prisma.report.update({ where: { id: reportId }, data: { verifiedPhotoPath: photoPath } });
+  }
+
+  return NextResponse.json({ photoPath, passed, reason });
 }

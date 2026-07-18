@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getSessionUserId } from "@/lib/auth";
 import { REPORT_RECOOLDOWN_MINUTES } from "@/lib/constants";
+import { pickRandomMissionCode } from "@/lib/missions";
 
 /**
  * POST /api/reports — 무단 점유 신고 접수 (PRD F9~F14)
@@ -58,7 +59,13 @@ export async function POST(request: Request) {
   try {
     await prisma.$transaction(async (tx) => {
       await tx.report.create({
-        data: { seatSessionId: session.id, reporterUserId, reportedAt, countdownEndsAt },
+        data: {
+          seatSessionId: session.id,
+          reporterUserId,
+          reportedAt,
+          countdownEndsAt,
+          missionCode: pickRandomMissionCode(),
+        },
       });
       await tx.notification.create({
         data: {

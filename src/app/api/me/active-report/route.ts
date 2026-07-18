@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSessionUserId } from "@/lib/auth";
+import { getMission } from "@/lib/missions";
 
 /**
  * GET /api/me/active-report — 로그인 사용자가 현재 점유 중인 좌석에 활성 신고가 걸려있는지 확인.
@@ -14,12 +15,18 @@ export async function GET() {
 
   const report = await prisma.report.findFirst({
     where: { status: "ACTIVE", seatSession: { userId, checkedOutAt: null } },
-    select: { id: true, seatSessionId: true, countdownEndsAt: true },
+    select: { id: true, seatSessionId: true, countdownEndsAt: true, missionCode: true },
   });
+  const mission = getMission(report?.missionCode);
 
   return NextResponse.json({
     activeReport: report
-      ? { reportId: report.id, seatSessionId: report.seatSessionId, countdownEndsAt: report.countdownEndsAt.toISOString() }
+      ? {
+          reportId: report.id,
+          seatSessionId: report.seatSessionId,
+          countdownEndsAt: report.countdownEndsAt.toISOString(),
+          missionLabel: mission?.label ?? "자리에 앉아서 인증샷 찍기",
+        }
       : null,
   });
 }
