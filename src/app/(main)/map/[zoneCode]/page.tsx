@@ -82,6 +82,7 @@ export default function ZoneSeatGridPage({
         ownDetailsBySeatId={ownDetailsBySeatId}
         awayCategories={categories}
         roomNumbers={roomNumbers}
+        zoneCode={zone}
         onCheckout={async (seatId) => {
           const seat = findSeat(seatId);
           if (!seat?.seatSessionId) return;
