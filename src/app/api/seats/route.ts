@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSessionUserId } from "@/lib/auth";
 import { getAwayCooldown, remainingSeconds } from "@/lib/seat-status";
+import { BADGE_DISPLAY_BY_CODE } from "@/lib/badges";
 import type { AwayCategoryCode, OwnSeatDetail, PublicSeatView, ZoneCode } from "@/lib/types";
 
 type SeatResponseItem = PublicSeatView &
@@ -31,6 +32,7 @@ export async function GET(request: Request) {
         include: {
           awayPeriods: { where: { endedAt: null }, take: 1, include: { category: true } },
           reports: { where: { status: "ACTIVE" }, take: 1 },
+          user: { select: { equippedBadgeCode: true } },
         },
       },
     },
@@ -51,6 +53,7 @@ export async function GET(request: Request) {
     const isMine = activeSession?.userId === userId;
     const activeAwayPeriod = activeSession?.awayPeriods[0];
     const activeReport = activeSession?.reports[0];
+    const equippedCode = activeSession?.user.equippedBadgeCode;
 
     const base: PublicSeatView = {
       id: seat.id,
@@ -63,6 +66,7 @@ export async function GET(request: Request) {
       isAway: Boolean(activeAwayPeriod),
       isMine,
       seatSessionId: activeSession?.id ?? null,
+      occupantBadge: equippedCode ? { code: equippedCode, ...BADGE_DISPLAY_BY_CODE[equippedCode] } : null,
     };
 
     if (!isMine) return base;

@@ -59,6 +59,20 @@ export const AWAY_CATEGORY_LIMIT_MINUTES: Record<AwayCategoryCode, number> = {
   MEETING: 90,
 };
 
+/**
+ * 마이페이지 외출 태그별 통계 도넛 차트 색상 — dataviz 스킬 카테고리 팔레트 슬롯 1~5(blue/
+ * green/magenta/yellow/aqua)를 away_categories.sort_order 순서 그대로 고정 배정한 것.
+ * `node scripts/validate_palette.js`로 라이트/다크 모드 둘 다 검증 통과(CVD ΔE ≥8, 대비 WARN은
+ * 직접 라벨/범례 병행으로 완화 — 차트 컴포넌트에서 항상 라벨을 같이 그린다).
+ */
+export const AWAY_CATEGORY_CHART_COLORS: Record<AwayCategoryCode, { light: string; dark: string }> = {
+  TOILET: { light: "#2a78d6", dark: "#3987e5" },
+  CAFE: { light: "#008300", dark: "#008300" },
+  CONVENIENCE: { light: "#e87ba4", dark: "#d55181" },
+  MEAL: { light: "#eda100", dark: "#c98500" },
+  MEETING: { light: "#1baf7a", dark: "#199e70" },
+};
+
 /** PRD 10.3 — 자리비움/신고 공통 경고 시점 공식: 잔여시간이 전체 허용시간의 20%일 때 */
 export const WARNING_THRESHOLD_RATIO = 0.2;
 
@@ -67,6 +81,12 @@ export const AWAY_COOLDOWN_MINUTES = 30;
 
 /** PRD F10/F12 — 신고 카운트다운 */
 export const REPORT_COUNTDOWN_MINUTES = 60;
+
+/**
+ * 신고 종결(자리 복귀 처리 또는 체크아웃) 후 같은 좌석을 다시 신고할 수 없는 최소 간격.
+ * 좌석 단위 쿨다운 — 종결된 세션이 그대로 남아있든(자리 복귀) 새 세션으로 바뀌었든(재이용) 적용.
+ */
+export const REPORT_RECOOLDOWN_MINUTES = 10;
 
 /** DB.md 14.6 — 감사 로그(신고자-피신고자 매핑) 보관 기간, 이후 익명화 배치 대상 */
 export const AUDIT_LOG_RETENTION_DAYS = 90;

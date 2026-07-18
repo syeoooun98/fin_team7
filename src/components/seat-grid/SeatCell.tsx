@@ -26,6 +26,14 @@ export function SeatCell({ seat, onClick }: { seat: PublicSeatView; onClick: () 
         {seatNumberLabel}
       </span>
       <span className="text-[10px] text-foreground-muted">{style.label}</span>
+      {seat.occupantBadge && (
+        <span
+          className="absolute -top-2 -left-2 flex h-5 w-5 items-center justify-center rounded-full bg-white text-xs shadow-sm"
+          title={seat.occupantBadge.title}
+        >
+          {seat.occupantBadge.icon}
+        </span>
+      )}
       {seat.isAway && (
         <span
           className="absolute -top-2 rounded-full border px-1.5 text-[10px] font-medium shadow-[0_1px_2px_rgba(15,23,42,0.08)]"

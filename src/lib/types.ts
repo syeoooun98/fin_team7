@@ -94,6 +94,11 @@ export interface PublicSeatView {
    * 노출해도 F14 익명성 원칙에 위배되지 않는다.
    */
   seatSessionId: number | null;
+  /**
+   * 점유자가 장착한 배지(아이콘+제목만) — 학번/이름 등 신원 정보는 절대 포함하지 않는다(F14).
+   * 장착한 배지가 없거나 좌석이 비어있으면 null.
+   */
+  occupantBadge: { code: BadgeCode; icon: string; title: string } | null;
 }
 
 /** 본인 시점 좌석 상세. 자리비움 중이면 실제 카테고리/잔여시간까지 노출 가능(F7 "본인에게만"). */
@@ -141,4 +146,52 @@ export interface NotificationItem {
   message: string;
   createdAt: string;
   readAt: string | null;
+}
+
+/** 마이페이지 외출 태그별 통계(주/월) 한 카테고리 분 */
+export interface AwayStatsCategory {
+  code: AwayCategoryCode;
+  label: string;
+  /** 해당 기간 내 완료된(체크아웃/자동반납/정상복귀 등으로 끝난) 자리비움 횟수 */
+  count: number;
+  /** 실제 사용 시간 합(분) — 신청 시 부여된 제한시간이 아니라 startedAt~endedAt 실측치 */
+  totalMinutes: number;
+}
+
+export interface AwayStats {
+  range: "week" | "month";
+  /** 집계 시작 시각(주: 이번 주 월요일 0시, 월: 이번 달 1일 0시) */
+  rangeStart: string;
+  categories: AwayStatsCategory[];
+}
+
+/** 마이페이지 일별 자리비움 시간 선그래프(최근 7일) 한 점 */
+export interface AwayDailyPoint {
+  /** YYYY-MM-DD (서버 로컬 기준 하루 단위) */
+  date: string;
+  totalMinutes: number;
+}
+
+export interface AwayDailyStats {
+  days: AwayDailyPoint[];
+}
+
+/** 마이페이지 배지/칭호 4종 — 기준은 lib/badges.ts 참고 */
+export type BadgeCode =
+  | "LIBRARY_REGULAR"
+  | "PRECISE_RETURN_MASTER"
+  | "JUSTICE_SHERIFF"
+  | "GONE_WITH_THE_WIND";
+
+export interface BadgeStatus {
+  code: BadgeCode;
+  title: string;
+  description: string;
+  /** 이모지 아이콘 — 별도 에셋 파이프라인 없이 표시 */
+  icon: string;
+  /** true면 불명예 칭호(바람과 함께 사라지다) */
+  dishonor: boolean;
+  earned: boolean;
+  /** 최초 획득 시각. 미획득이면 null */
+  awardedAt: string | null;
 }

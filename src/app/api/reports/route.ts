@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getSessionUserId } from "@/lib/auth";
+import { REPORT_RECOOLDOWN_MINUTES } from "@/lib/constants";
 
 /**
  * POST /api/reports — 무단 점유 신고 접수 (PRD F9~F14)
@@ -25,6 +26,30 @@ export async function POST(request: Request) {
   }
   if (session.userId === reporterUserId) {
     return NextResponse.json({ accepted: false, message: "본인 좌석은 신고할 수 없습니다." }, { status: 400 });
+  }
+
+  // 좌석 단위 재신고 쿨다운 — 이 좌석에서 가장 최근에 종결된 신고가 10분 이내라면,
+  // 그 신고가 걸려있던 세션이 지금도 그대로 앉아있는지(자리 복귀)에 따라 다른 문구로 거부한다.
+  const recentResolved = await prisma.report.findFirst({
+    where: {
+      seatSession: { seatId: session.seatId },
+      status: { in: ["CANCELLED_RETURN", "CHECKED_OUT", "AUTO_EXPIRED"] },
+      resolvedAt: { not: null },
+    },
+    orderBy: { resolvedAt: "desc" },
+  });
+
+  if (recentResolved?.resolvedAt) {
+    const cooldownEndsAt = new Date(
+      recentResolved.resolvedAt.getTime() + REPORT_RECOOLDOWN_MINUTES * 60_000,
+    );
+    if (new Date() < cooldownEndsAt) {
+      const message =
+        recentResolved.seatSessionId === session.id
+          ? "자리 복귀 처리가 완료되어 바로 다시 신고할 수 없어요!"
+          : "새로 이용된 좌석입니다! 10분 이후부터 신고 가능합니다!";
+      return NextResponse.json({ accepted: false, message });
+    }
   }
 
   const reportedAt = new Date();
