@@ -176,12 +176,14 @@ export interface AwayDailyStats {
   days: AwayDailyPoint[];
 }
 
-/** 마이페이지 배지/칭호 4종 — 기준은 lib/badges.ts 참고 */
+/** 마이페이지 배지/칭호 6종 — 기준은 lib/badges.ts 참고 */
 export type BadgeCode =
   | "LIBRARY_REGULAR"
   | "PRECISE_RETURN_MASTER"
   | "JUSTICE_SHERIFF"
-  | "GONE_WITH_THE_WIND";
+  | "GONE_WITH_THE_WIND"
+  | "WEEKLY_CERT_STAR"
+  | "COMMUNITY_GUARDIAN";
 
 export interface BadgeStatus {
   code: BadgeCode;
@@ -194,4 +196,29 @@ export interface BadgeStatus {
   earned: boolean;
   /** 최초 획득 시각. 미획득이면 null */
   awardedAt: string | null;
+}
+
+export type CommunitySort = "recent" | "likes" | "comments";
+
+/**
+ * 커뮤니티 게시글 카드 뷰. authorBadge는 장착한 배지의 아이콘+제목만 — 학번/이름은 절대
+ * 포함하지 않는다(F14 연장 적용). photoUrl은 항상 만료 있는 signed URL이다.
+ */
+export interface CommunityPostSummary {
+  id: number;
+  photoUrl: string;
+  authorBadge: { code: BadgeCode; icon: string; title: string } | null;
+  createdAt: string;
+  likeCount: number;
+  commentCount: number;
+  likedByMe: boolean;
+  isMine: boolean;
+}
+
+export interface CommunityComment {
+  id: number;
+  authorBadge: { code: BadgeCode; icon: string; title: string } | null;
+  content: string;
+  createdAt: string;
+  isMine: boolean;
 }

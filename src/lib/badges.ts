@@ -5,6 +5,11 @@
 // - 50시간, 5분, 3번(바람과 함께 사라지다)은 사용자가 직접 명시한 값 그대로.
 // - PRECISE_RETURN_MASTER_MIN_COUNT / JUSTICE_SHERIFF_MIN_COUNT(각 3회)는 "누적 몇 번이어야
 //   칭호를 줄 만큼 의미 있는가"에 대한 PM 가정치다 — 실측 없이 정한 값이라 파일럿 후 조정 대상.
+// - WEEKLY_CERT_STAR_LIKE_THRESHOLD(100)는 기획서에 명시된 값 그대로.
+// - COMMUNITY_GUARDIAN_MIN_COMMENTS(10)는 "댓글이 활발하다"를 수치화한 PM 가정치 — 실측 필요.
+//   "금주의 인증샷"이라는 이름과 달리, 매주 재평가하려면 좋아요 발생 시각 기준 주간 집계 배치가
+//   따로 필요하다 — 이번 스코프에서는 다른 배지들과 동일하게 "역대 어떤 게시글이든 100좋아요를
+//   넘긴 적 있음"을 만족하면 부여하는 ALL_TIME 누적 업적으로 단순화했다.
 import { prisma } from "@/lib/db";
 import type { BadgeCode, BadgeStatus } from "@/lib/types";
 
@@ -13,6 +18,8 @@ const PRECISE_RETURN_BUFFER_MINUTES = 5;
 const PRECISE_RETURN_MASTER_MIN_COUNT = 3; // 가정치 — 실측 필요
 const JUSTICE_SHERIFF_MIN_COUNT = 3; // 가정치 — 실측 필요
 const GONE_WITH_THE_WIND_COUNT = 3;
+const WEEKLY_CERT_STAR_LIKE_THRESHOLD = 100;
+const COMMUNITY_GUARDIAN_MIN_COMMENTS = 10; // 가정치 — 실측 필요
 
 interface BadgeDefinition {
   code: BadgeCode;
@@ -50,6 +57,20 @@ const BADGE_DEFINITIONS: BadgeDefinition[] = [
     description: "자리비움 신청 없이 신고당해 자동반납된 적이 3번이에요.",
     icon: "🐇💨",
     dishonor: true,
+  },
+  {
+    code: "WEEKLY_CERT_STAR",
+    title: "금주의 인증샷",
+    description: "내가 커뮤니티에 올린 인증샷이 좋아요 100개 이상을 받은 적이 있어요.",
+    icon: "🌟",
+    dishonor: false,
+  },
+  {
+    code: "COMMUNITY_GUARDIAN",
+    title: "커뮤니티 수호자",
+    description: "다른 이용자들과 댓글로 활발하게 소통했어요.",
+    icon: "🛡️",
+    dishonor: false,
   },
 ];
 
@@ -142,15 +163,39 @@ async function checkGoneWithTheWind(userId: number): Promise<boolean> {
   return count >= GONE_WITH_THE_WIND_COUNT;
 }
 
-/** 조건을 새로 충족한 배지를 upsert로 부여하고, 4종 전체 상태(획득 여부 포함)를 반환한다. */
+/** 금주의 인증샷 — 전체 기간 누적. 본인 게시글 중 좋아요 100개 이상 받은 게 하나라도 있는지. */
+async function checkWeeklyCertStar(userId: number): Promise<boolean> {
+  const posts = await prisma.communityPost.findMany({
+    where: { userId },
+    select: { _count: { select: { likes: true } } },
+  });
+  return posts.some((post) => post._count.likes >= WEEKLY_CERT_STAR_LIKE_THRESHOLD);
+}
+
+/** 커뮤니티 수호자 — 전체 기간 누적. 본인이 작성한 댓글 수. */
+async function checkCommunityGuardian(userId: number): Promise<boolean> {
+  const count = await prisma.communityComment.count({ where: { userId } });
+  return count >= COMMUNITY_GUARDIAN_MIN_COMMENTS;
+}
+
+/** 조건을 새로 충족한 배지를 upsert로 부여하고, 6종 전체 상태(획득 여부 포함)를 반환한다. */
 export async function evaluateAndGetBadges(userId: number): Promise<BadgeStatus[]> {
   const now = new Date();
 
-  const [isLibraryRegular, isPreciseReturnMaster, isJusticeSheriff, isGoneWithTheWind] = await Promise.all([
+  const [
+    isLibraryRegular,
+    isPreciseReturnMaster,
+    isJusticeSheriff,
+    isGoneWithTheWind,
+    isWeeklyCertStar,
+    isCommunityGuardian,
+  ] = await Promise.all([
     checkLibraryRegular(userId, now),
     checkPreciseReturnMaster(userId),
     checkJusticeSheriff(userId),
     checkGoneWithTheWind(userId),
+    checkWeeklyCertStar(userId),
+    checkCommunityGuardian(userId),
   ]);
 
   const toAward: { badgeCode: BadgeCode; periodLabel: string }[] = [];
@@ -158,6 +203,8 @@ export async function evaluateAndGetBadges(userId: number): Promise<BadgeStatus[
   if (isPreciseReturnMaster) toAward.push({ badgeCode: "PRECISE_RETURN_MASTER", periodLabel: "ALL_TIME" });
   if (isJusticeSheriff) toAward.push({ badgeCode: "JUSTICE_SHERIFF", periodLabel: "ALL_TIME" });
   if (isGoneWithTheWind) toAward.push({ badgeCode: "GONE_WITH_THE_WIND", periodLabel: "ALL_TIME" });
+  if (isWeeklyCertStar) toAward.push({ badgeCode: "WEEKLY_CERT_STAR", periodLabel: "ALL_TIME" });
+  if (isCommunityGuardian) toAward.push({ badgeCode: "COMMUNITY_GUARDIAN", periodLabel: "ALL_TIME" });
 
   for (const { badgeCode, periodLabel } of toAward) {
     await prisma.userBadge.upsert({
