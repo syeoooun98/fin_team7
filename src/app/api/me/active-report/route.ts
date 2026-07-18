@@ -14,10 +14,12 @@ export async function GET() {
 
   const report = await prisma.report.findFirst({
     where: { status: "ACTIVE", seatSession: { userId, checkedOutAt: null } },
-    select: { id: true, seatSessionId: true },
+    select: { id: true, seatSessionId: true, countdownEndsAt: true },
   });
 
   return NextResponse.json({
-    activeReport: report ? { reportId: report.id, seatSessionId: report.seatSessionId } : null,
+    activeReport: report
+      ? { reportId: report.id, seatSessionId: report.seatSessionId, countdownEndsAt: report.countdownEndsAt.toISOString() }
+      : null,
   });
 }

@@ -57,7 +57,7 @@ export async function GET(request: Request) {
               "자리비움 제한시간이 지나 자동 반납되었습니다. 소지품은 시스템이 관리하지 않으니 직접 회수하거나 도서관 분실물 보관소로 문의하세요. (14.7)",
           },
         });
-        await notifyCheckoutWatchers(tx, away.seatSessionId, away.seatSession.seat.seatCode);
+        await triggerCheckoutAlarms(tx, away.seatSessionId, away.seatSession.seat.seatCode);
       });
       awayExpired++;
     } else if (!away.warningSentAt && isWarningThresholdReached(away.startedAt, away.limitMinutes, now)) {
@@ -116,7 +116,7 @@ export async function GET(request: Request) {
             },
           });
         }
-        await notifyCheckoutWatchers(tx, report.seatSessionId, report.seatSession.seat.seatCode);
+        await triggerCheckoutAlarms(tx, report.seatSessionId, report.seatSession.seat.seatCode);
       });
       reportExpired++;
     } else if (

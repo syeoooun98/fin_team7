@@ -7,6 +7,7 @@ import { LogoutButton } from "./LogoutButton";
 const NAV_ITEMS = [
   { href: "/", label: "대시보드" },
   { href: "/map", label: "좌석 맵" },
+  { href: "/community", label: "커뮤니티" },
   { href: "/mypage", label: "마이페이지" },
 ];
 

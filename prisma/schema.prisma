@@ -36,11 +36,15 @@ model User {
   /// 아이콘·제목만 노출되고 학번/이름은 절대 딸려 나가지 않는다 — F14 익명성 원칙 유지.
   equippedBadgeCode BadgeCode? @map("equipped_badge_code")
 
-  seatSessions    SeatSession[]
-  reportsFiled    Report[]         @relation("ReporterUser")
-  notifications   Notification[]
-  checkoutAlarms  CheckoutAlarm[]
-  badges          UserBadge[]
+  seatSessions      SeatSession[]
+  reportsFiled      Report[]           @relation("ReporterUser")
+  notifications     Notification[]
+  checkoutAlarms    CheckoutAlarm[]
+  badges            UserBadge[]
+  communityPosts    CommunityPost[]
+  communityComments CommunityComment[]
+  communityLikes    CommunityLike[]
+  seatWatchRequests SeatWatchRequest[]
 
   @@map("users")
 }
@@ -104,12 +108,13 @@ model SeatSession {
   checkedOutAt   DateTime?       @map("checked_out_at")
   checkoutReason CheckoutReason? @map("checkout_reason")
 
-  seat           Seat            @relation(fields: [seatId], references: [id])
-  user           User            @relation(fields: [userId], references: [id])
-  awayPeriods    AwayPeriod[]
-  reports        Report[]
-  notifications  Notification[]
-  checkoutAlarms CheckoutAlarm[]
+  seat              Seat                @relation(fields: [seatId], references: [id])
+  user              User                @relation(fields: [userId], references: [id])
+  awayPeriods       AwayPeriod[]
+  reports           Report[]
+  notifications     Notification[]
+  checkoutAlarms    CheckoutAlarm[]
+  seatWatchRequests SeatWatchRequest[]
 
   @@index([seatId])
   @@index([userId])
@@ -150,10 +155,15 @@ model Report {
   resolvedAt       DateTime?    @map("resolved_at")
   /// 20% 잔여 경고(10.3) 중복 발송 방지용
   warningSentAt    DateTime?    @map("warning_sent_at")
+  /// 인증샷 미션(자리 복귀) 결과물 — Supabase Storage 오브젝트 경로(공개 URL이 아니다).
+  /// 항상 signed URL로만 서빙한다 — private 버킷 + 서비스롤 키로만 접근하므로 URL 자체가
+  /// 새어나가도 만료 전 잠깐을 제외하면 열람 불가(F14 익명성 원칙과 동일한 이유로 공개 경로 지양).
+  photoPath        String?      @map("photo_path")
 
   seatSession   SeatSession     @relation(fields: [seatSessionId], references: [id])
   reporterUser  User?           @relation("ReporterUser", fields: [reporterUserId], references: [id])
   notifications Notification[]
+  communityPost CommunityPost?
 
   @@index([seatSessionId])
   @@map("reports")
@@ -215,6 +225,71 @@ model UserBadge {
   @@map("user_badges")
 }
 
+/// 커뮤니티 게시글 — 신고 복귀 인증샷을 본인이 공개 공유하기로 선택한 경우에만 생성된다.
+/// reportId 1:1 — 신고 하나(=인증샷 하나)당 게시글은 최대 1개.
+/// 작성자 신원(학번/이름)은 API 응답에 절대 포함하지 않는다 — 장착 배지(아이콘+제목)만 노출(F14 연장 적용).
+model CommunityPost {
+  id        Int      @id @default(autoincrement())
+  reportId  Int      @unique @map("report_id")
+  userId    Int      @map("user_id")
+  /// Report.photoPath와 동일한 이유로 storage 오브젝트 경로만 저장 — signed URL은 조회 시 발급.
+  photoPath String   @map("photo_path")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  report   Report              @relation(fields: [reportId], references: [id])
+  user     User                @relation(fields: [userId], references: [id])
+  comments CommunityComment[]
+  likes    CommunityLike[]
+
+  @@index([userId])
+  @@map("community_posts")
+}
+
+model CommunityComment {
+  id        Int      @id @default(autoincrement())
+  postId    Int      @map("post_id")
+  userId    Int      @map("user_id")
+  content   String   @db.VarChar(300)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [id])
+
+  @@index([postId])
+  @@map("community_comments")
+}
+
+model CommunityLike {
+  id        Int      @id @default(autoincrement())
+  postId    Int      @map("post_id")
+  userId    Int      @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@map("community_likes")
+}
+
+/// 좌석 알림 신청 — 팀원이 실제 DB에 먼저 만들어둔 기능(관심 좌석이 비면 알림)을 이 파일로
+/// 역반영한 것. schema.prisma에 없던 상태로 라이브 DB에만 존재했어서 `db push`가 삭제 시도했다 —
+/// 컬럼 구성은 실제 DB 그대로. RLS가 비활성화되어 있다는 보안 권고가 있었음(팀에 별도 공유 필요).
+model SeatWatchRequest {
+  id            Int       @id @default(autoincrement())
+  seatSessionId Int       @map("seat_session_id")
+  watcherUserId Int       @map("watcher_user_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  notifiedAt    DateTime? @map("notified_at")
+
+  seatSession SeatSession @relation(fields: [seatSessionId], references: [id])
+  watcherUser User        @relation(fields: [watcherUserId], references: [id])
+
+  @@unique([seatSessionId, watcherUserId])
+  @@map("seat_watch_requests")
+}
+
 /// 7.1 좌석 2대 상태(예약가능/이용중). "이용중"의 하위 표시(재실/외출)는 SeatStatus가 아니라
 /// 활성 AwayPeriod 유무로 구분한다(EMPTY "방금 비었어요" 상태는 폐기 — 예약가능에 흡수됨).
 enum SeatStatus {
@@ -257,6 +332,8 @@ enum NotificationType {
   REPORT_CANCELLED
   /// 신고당한 사람이 신고 처리 팝업에서 체크아웃을 선택했을 때 신고자에게 보내는 알림
   REPORT_CHECKED_OUT
+  /// 관심 좌석이 비었을 때(SeatWatchRequest) — 팀원 기능, 이 파일에는 역반영만 함
+  SEAT_WATCH_AVAILABLE
   /// "체크아웃 시 알림"을 신청한 좌석이 실제로 체크아웃됐을 때(F22)
   CHECKOUT_ALARM_TRIGGERED
 }
@@ -271,4 +348,8 @@ enum BadgeCode {
   JUSTICE_SHERIFF
   /// 바람과 함께 사라지다 — 자리비움 신청 없이 신고당해 자동반납된 횟수 3회(불명예 칭호)
   GONE_WITH_THE_WIND
+  /// 금주의 인증샷 — 본인 게시글이 좋아요 100개 이상 받은 적 있음(누적, ALL_TIME으로 단순화 — lib/badges.ts 주석 참고)
+  WEEKLY_CERT_STAR
+  /// 커뮤니티 수호자 — 댓글 활동이 활발함(누적 댓글 수 기준, lib/badges.ts 주석 참고)
+  COMMUNITY_GUARDIAN
 }
