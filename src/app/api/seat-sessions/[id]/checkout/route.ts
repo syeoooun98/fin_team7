@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSessionUserId } from "@/lib/auth";
-import { notifyCheckoutWatchers } from "@/lib/notify-watchers";
+import { triggerCheckoutAlarms } from "@/lib/checkout-alarm";
 
 /** POST /api/seat-sessions/[id]/checkout — PRD F4 */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -46,7 +46,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         message: "체크아웃이 완료되었습니다.",
       },
     });
-    await notifyCheckoutWatchers(tx, session.id, session.seat.seatCode);
+    await triggerCheckoutAlarms(tx, session.id, session.seat.seatCode);
 
     // "자리 복귀를 인증하세요" 팝업에서 자리 복귀 대신 체크아웃을 선택한 경우 —
     // 활성 신고를 종결하고 신고자에게 익명 알림을 보낸다.

@@ -6,30 +6,30 @@ import type { Prisma } from "@prisma/client";
 type TransactionClient = Prisma.TransactionClient;
 
 /**
- * seatSessionId를 구독 중이던(아직 알림 안 간) 요청을 전부 찾아 알림을 만들고
+ * seatSessionId를 구독 중이던(아직 알림 안 간) 체크아웃 알림을 전부 찾아 알림을 만들고
  * notifiedAt을 채운다. 구독자가 없으면 아무 일도 하지 않는다.
  */
-export async function notifyCheckoutWatchers(
+export async function triggerCheckoutAlarms(
   tx: TransactionClient,
   seatSessionId: number,
   seatCode: string,
 ) {
-  const pendingWatches = await tx.seatWatchRequest.findMany({
+  const pendingAlarms = await tx.checkoutAlarm.findMany({
     where: { seatSessionId, notifiedAt: null },
   });
-  if (pendingWatches.length === 0) return;
+  if (pendingAlarms.length === 0) return;
 
   const now = new Date();
   await tx.notification.createMany({
-    data: pendingWatches.map((watch) => ({
-      userId: watch.watcherUserId,
-      type: "SEAT_WATCH_AVAILABLE" as const,
+    data: pendingAlarms.map((alarm) => ({
+      userId: alarm.userId,
+      type: "CHECKOUT_ALARM_TRIGGERED" as const,
       seatSessionId,
       message: `${seatCode} 좌석이 체크아웃되었어요!`,
     })),
   });
-  await tx.seatWatchRequest.updateMany({
-    where: { id: { in: pendingWatches.map((watch) => watch.id) } },
+  await tx.checkoutAlarm.updateMany({
+    where: { id: { in: pendingAlarms.map((alarm) => alarm.id) } },
     data: { notifiedAt: now },
   });
 }

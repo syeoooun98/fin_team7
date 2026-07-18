@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { isWarningThresholdReached } from "@/lib/seat-status";
-import { notifyCheckoutWatchers } from "@/lib/notify-watchers";
+import { triggerCheckoutAlarms } from "@/lib/checkout-alarm";
 
 /**
  * GET /api/cron/auto-expire — PRD F6(자리비움 자동반납)/F12(신고 자동반납)/10.3(20% 경고)를
