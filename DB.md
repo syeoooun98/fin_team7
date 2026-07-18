@@ -293,8 +293,24 @@ CREATE UNIQUE INDEX ux_reports_active_session
 | `REPORT_AUTO_EXPIRED_OCCUPANT` | 신고로 인한 자동반납 (소지품 안내 문구 포함, 14.7) | 피신고자 |
 | `REPORT_AUTO_EXPIRED_REPORTER` | 신고로 인한 자동반납 (좌석 이용 가능 안내) | 신고자 |
 | `REPORT_CANCELLED` | 피신고자 복귀로 신고 취소 (익명) | 신고자 |
+| `REPORT_CHECKED_OUT` | 신고 처리 팝업에서 피신고자가 "자리 복귀" 대신 체크아웃을 선택 | 신고자 |
+| `SEAT_WATCH_AVAILABLE` | "체크아웃 시 알림"을 신청한 좌석이 실제로 체크아웃됨(F22, 2.9절) | 알림 신청자 |
 
 > F8의 쿨다운 거부 안내는 **알림이 아니라 신청 요청에 대한 동기(synchronous) 응답**으로 처리한다(비동기로 저장할 이유가 없는 즉각적 UI 피드백이므로 `notifications`에 넣지 않았다).
+
+### 2.9 `seat_watch_requests` — "체크아웃 시 알림" 구독 (근거: F22)
+
+이용 중(외출 포함)인 좌석 상세에서 "체크아웃 시 알림"을 누르면 그 시점의 활성 `seat_sessions` 행을 대상으로 구독을 남긴다. 그 세션이 실제로 체크아웃되면(수동 체크아웃/자리비움 자동반납/신고 자동반납 3개 경로 전부) 구독자에게 `SEAT_WATCH_AVAILABLE` 알림을 보내고 `notified_at`을 채운다.
+
+| 컬럼 | 타입 | 제약조건 | 설명 |
+|---|---|---|---|
+| id | BIGSERIAL | PK | |
+| seat_session_id | BIGINT | NOT NULL, FK → seat_sessions(id) | 구독 대상 세션(신청 시점의 활성 세션) |
+| watcher_user_id | BIGINT | NOT NULL, FK → users(id) | 구독한 이용자 |
+| created_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
+| notified_at | TIMESTAMPTZ | NULL | 알림 발송 시각. NULL이면 아직 미발송(=대상 세션이 아직 체크아웃 안 됨) |
+
+> UNIQUE(seat_session_id, watcher_user_id) — 같은 세션에 같은 사용자가 중복 구독해도 1건만 유지(재신청은 idempotent). 본인 좌석 구독은 API 레이어에서 거부한다.
 
 ---
 

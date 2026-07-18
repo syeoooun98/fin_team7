@@ -36,10 +36,11 @@ model User {
   /// 아이콘·제목만 노출되고 학번/이름은 절대 딸려 나가지 않는다 — F14 익명성 원칙 유지.
   equippedBadgeCode BadgeCode? @map("equipped_badge_code")
 
-  seatSessions   SeatSession[]
-  reportsFiled   Report[]        @relation("ReporterUser")
-  notifications  Notification[]
-  badges         UserBadge[]
+  seatSessions    SeatSession[]
+  reportsFiled    Report[]         @relation("ReporterUser")
+  notifications   Notification[]
+  checkoutAlarms  CheckoutAlarm[]
+  badges          UserBadge[]
 
   @@map("users")
 }
@@ -103,11 +104,12 @@ model SeatSession {
   checkedOutAt   DateTime?       @map("checked_out_at")
   checkoutReason CheckoutReason? @map("checkout_reason")
 
-  seat          Seat            @relation(fields: [seatId], references: [id])
-  user          User            @relation(fields: [userId], references: [id])
-  awayPeriods   AwayPeriod[]
-  reports       Report[]
-  notifications Notification[]
+  seat           Seat            @relation(fields: [seatId], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
+  awayPeriods    AwayPeriod[]
+  reports        Report[]
+  notifications  Notification[]
+  checkoutAlarms CheckoutAlarm[]
 
   @@index([seatId])
   @@index([userId])
@@ -177,6 +179,26 @@ model Notification {
   @@map("notifications")
 }
 
+/// 2.9 checkout_alarms — "체크아웃 시 알림" 구독 (근거: PRD F22)
+/// 이용 중(외출 포함)인 좌석에 대해 신청한 체크아웃 알림 구독. 신청 시점의 활성 세션
+/// (seatSessionId)이 실제로 체크아웃되면 신청자에게 알림을 보내고 notifiedAt을 채운다.
+/// 같은 세션에 같은 사용자가 중복 신청해도 @@unique로 1건만 유지된다(재신청은 idempotent).
+model CheckoutAlarm {
+  id            Int       @id @default(autoincrement())
+  seatSessionId Int       @map("seat_session_id")
+  userId        Int       @map("user_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  /// 알림 발송 시각 — null이면 아직 대상 세션이 체크아웃되지 않은 것
+  notifiedAt    DateTime? @map("notified_at")
+
+  seatSession SeatSession @relation(fields: [seatSessionId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+
+  @@unique([seatSessionId, userId])
+  @@index([seatSessionId])
+  @@map("checkout_alarms")
+}
+
 /// 마이페이지 배지/칭호 시스템 — 조건을 충족하는 순간 lib/badges.ts가 upsert로 부여하고
 /// 이후 조건을 더 이상 만족하지 못해도 유지되는 "업적"이다(게임의 도전과제와 동일한 개념).
 model UserBadge {
@@ -235,6 +257,8 @@ enum NotificationType {
   REPORT_CANCELLED
   /// 신고당한 사람이 신고 처리 팝업에서 체크아웃을 선택했을 때 신고자에게 보내는 알림
   REPORT_CHECKED_OUT
+  /// "체크아웃 시 알림"을 신청한 좌석이 실제로 체크아웃됐을 때(F22)
+  CHECKOUT_ALARM_TRIGGERED
 }
 
 /// 마이페이지 배지/칭호 4종 — 기준은 lib/badges.ts 참고
