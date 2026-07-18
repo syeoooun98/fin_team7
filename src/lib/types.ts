@@ -40,7 +40,10 @@ export type ReportStatus = "ACTIVE" | "CANCELLED_RETURN" | "AUTO_EXPIRED" | "CHE
 
 export type AwayCategoryCode = "TOILET" | "CAFE" | "CONVENIENCE" | "MEAL" | "MEETING";
 
-/** DB.md 2.8절 표 + REPORT_CHECKED_OUT(신고 처리 팝업에서 체크아웃 선택 시) */
+/**
+ * DB.md 2.8절 표 + REPORT_CHECKED_OUT(신고 처리 팝업에서 체크아웃 선택 시)
+ * + SEAT_WATCH_AVAILABLE("체크아웃 시 알림" 신청 좌석이 실제로 체크아웃됨, F22, DB.md 2.9절)
+ */
 export type NotificationType =
   | "CHECKIN_COMPLETE"
   | "CHECKOUT_COMPLETE"
@@ -52,7 +55,8 @@ export type NotificationType =
   | "REPORT_AUTO_EXPIRED_OCCUPANT"
   | "REPORT_AUTO_EXPIRED_REPORTER"
   | "REPORT_CANCELLED"
-  | "REPORT_CHECKED_OUT";
+  | "REPORT_CHECKED_OUT"
+  | "SEAT_WATCH_AVAILABLE";
 
 export interface Zone {
   code: ZoneCode;
@@ -146,6 +150,11 @@ export interface NotificationItem {
   message: string;
   createdAt: string;
   readAt: string | null;
+  /**
+   * type이 SEAT_WATCH_AVAILABLE일 때만 채워짐 — "바로 이용하기" 액션이 체크인할 좌석 코드.
+   * seat_sessions → seats 조인으로 API가 채워준다(F22).
+   */
+  seatCode?: string | null;
 }
 
 /** 마이페이지 외출 태그별 통계(주/월) 한 카테고리 분 */

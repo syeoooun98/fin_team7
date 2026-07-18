@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { isWarningThresholdReached } from "@/lib/seat-status";
+import { triggerCheckoutAlarms } from "@/lib/checkout-alarm";
 
 /**
  * GET /api/cron/auto-expire — PRD F6(자리비움 자동반납)/F12(신고 자동반납)/10.3(20% 경고)를
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
   // --- F6: 자리비움 자동반납 ---
   const activeAwayPeriods = await prisma.awayPeriod.findMany({
     where: { endedAt: null },
-    include: { seatSession: true },
+    include: { seatSession: { include: { seat: true } } },
   });
 
   for (const away of activeAwayPeriods) {
@@ -56,6 +57,7 @@ export async function GET(request: Request) {
               "자리비움 제한시간이 지나 자동 반납되었습니다. 소지품은 시스템이 관리하지 않으니 직접 회수하거나 도서관 분실물 보관소로 문의하세요. (14.7)",
           },
         });
+        await notifyCheckoutWatchers(tx, away.seatSessionId, away.seatSession.seat.seatCode);
       });
       awayExpired++;
     } else if (!away.warningSentAt && isWarningThresholdReached(away.startedAt, away.limitMinutes, now)) {
@@ -77,7 +79,7 @@ export async function GET(request: Request) {
   // --- F12: 신고로 인한 자동반납 ---
   const activeReports = await prisma.report.findMany({
     where: { status: "ACTIVE" },
-    include: { seatSession: true },
+    include: { seatSession: { include: { seat: true } } },
   });
 
   for (const report of activeReports) {
@@ -114,6 +116,7 @@ export async function GET(request: Request) {
             },
           });
         }
+        await notifyCheckoutWatchers(tx, report.seatSessionId, report.seatSession.seat.seatCode);
       });
       reportExpired++;
     } else if (
