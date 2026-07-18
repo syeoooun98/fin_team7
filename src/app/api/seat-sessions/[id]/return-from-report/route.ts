@@ -4,8 +4,9 @@ import { getSessionUserId } from "@/lib/auth";
 
 /**
  * POST /api/seat-sessions/[id]/return-from-report — F11: 신고당한 좌석의 "자리 복귀".
- * "자리에 앉아서 책과 함께" 인증샷 미션 완료가 조건 — body에 /api/verification-photos가
- * 돌려준 photoPath가 없으면 신고를 해제해주지 않는다(사진 없이 버튼만 누르는 우회 방지).
+ * 배정된 미션(lib/missions.ts) 인증샷 완료가 조건 — body의 photoPath가 /api/verification-photos가
+ * AI 검증까지 통과시켜 Report.verifiedPhotoPath에 기록해둔 값과 정확히 일치해야 신고가 해제된다
+ * (사진 없이 버튼만 누르거나, 미션에 안 맞는 사진으로 우회하는 것 모두 방지).
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const userId = await getSessionUserId();
@@ -30,6 +31,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   });
   if (!activeReport) {
     return NextResponse.json({ message: "진행 중인 신고가 없습니다." }, { status: 404 });
+  }
+  if (!activeReport.verifiedPhotoPath || activeReport.verifiedPhotoPath !== photoPath) {
+    return NextResponse.json({ message: "미션에 맞는 인증샷이 아니에요. 다시 찍어주세요." }, { status: 400 });
   }
 
   await prisma.$transaction(async (tx) => {

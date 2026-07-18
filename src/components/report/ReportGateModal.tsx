@@ -13,6 +13,7 @@ interface ActiveReport {
   reportId: number;
   seatSessionId: number;
   countdownEndsAt: string;
+  missionLabel: string;
 }
 
 /**
@@ -27,11 +28,20 @@ export function ReportGateModal() {
   const [awaitingShareChoice, setAwaitingShareChoice] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const dismissedSessionId = useRef<number | null>(null);
+  const awaitingShareChoiceRef = useRef(false);
+
+  useEffect(() => {
+    awaitingShareChoiceRef.current = awaitingShareChoice;
+  }, [awaitingShareChoice]);
 
   useEffect(() => {
     let cancelled = false;
 
     async function poll() {
+      // 공유 여부 팝업이 떠 있는 동안은 신고가 이미 처리돼 서버가 activeReport: null을 반환하므로,
+      // 여기서 갱신을 반영하면 팝업이 사용자 응답 전에 사라진다 — 응답할 때까지 폴링을 무시한다.
+      if (awaitingShareChoiceRef.current) return;
+
       const res = await fetch("/api/me/active-report");
       if (!res.ok || cancelled) return;
       const data: { activeReport: ActiveReport | null } = await res.json();
@@ -81,13 +91,14 @@ export function ReportGateModal() {
         <p className="text-sm font-semibold text-neutral-800">자리 복귀를 인증하세요!</p>
         <p className="text-sm text-neutral-600">
           누군가 지금 좌석의 장시간 부재를 신고했습니다. 자리로 돌아왔다면 아래 미션으로 인증샷을 올려
-          &ldquo;자리 복귀&rdquo;를, 이미 자리를 떠난 상태라면 &ldquo;체크아웃&rdquo;을 선택해주세요.
+          &ldquo;자리 복귀&rdquo;를, 이미 자리를 떠난 상태라면 &ldquo;체크아웃&rdquo;을 해주세요.
         </p>
 
         <PhotoCaptureView
           reportId={activeReport.reportId}
           seatSessionId={activeReport.seatSessionId}
           countdownEndsAt={activeReport.countdownEndsAt}
+          missionLabel={activeReport.missionLabel}
           onMissionComplete={() => setAwaitingShareChoice(true)}
         />
 

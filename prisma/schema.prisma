@@ -28,10 +28,10 @@ datasource db {
 
 /// 2.1 users — 이용자 계정 (근거: PRD F1, 14.1)
 model User {
-  id           Int      @id @default(autoincrement())
-  studentId    String   @unique @map("student_id") @db.VarChar(20)
-  passwordHash String   @map("password_hash") @db.VarChar(255)
-  createdAt    DateTime @default(now()) @map("created_at")
+  id                Int        @id @default(autoincrement())
+  studentId         String     @unique @map("student_id") @db.VarChar(20)
+  passwordHash      String     @map("password_hash") @db.VarChar(255)
+  createdAt         DateTime   @default(now()) @map("created_at")
   /// 본인이 획득한 배지 중 좌석 이용 중 남에게 보여줄 것으로 선택한 것 (없으면 NULL).
   /// 아이콘·제목만 노출되고 학번/이름은 절대 딸려 나가지 않는다 — F14 익명성 원칙 유지.
   equippedBadgeCode BadgeCode? @map("equipped_badge_code")
@@ -108,8 +108,8 @@ model SeatSession {
   checkedOutAt   DateTime?       @map("checked_out_at")
   checkoutReason CheckoutReason? @map("checkout_reason")
 
-  seat              Seat                @relation(fields: [seatId], references: [id])
-  user              User                @relation(fields: [userId], references: [id])
+  seat              Seat               @relation(fields: [seatId], references: [id])
+  user              User               @relation(fields: [userId], references: [id])
   awayPeriods       AwayPeriod[]
   reports           Report[]
   notifications     Notification[]
@@ -145,23 +145,29 @@ model AwayPeriod {
 /// 2.7 reports — 무단 점유 신고 (근거: PRD F9~F14)
 /// 부분 유니크 인덱스(세션당 활성 신고 1건, F13)는 prisma/partial_unique_indexes.sql 참고.
 model Report {
-  id               Int          @id @default(autoincrement())
-  seatSessionId    Int          @map("seat_session_id")
+  id                Int          @id @default(autoincrement())
+  seatSessionId     Int          @map("seat_session_id")
   /// 민감 컬럼 — 어떤 조회 API/뷰에서도 일반 이용자에게 조인·노출 금지 (F14, DB.md 5절)
-  reporterUserId   Int?         @map("reporter_user_id")
-  reportedAt       DateTime     @default(now()) @map("reported_at")
-  countdownEndsAt  DateTime     @map("countdown_ends_at")
-  status           ReportStatus @default(ACTIVE)
-  resolvedAt       DateTime?    @map("resolved_at")
+  reporterUserId    Int?         @map("reporter_user_id")
+  reportedAt        DateTime     @default(now()) @map("reported_at")
+  countdownEndsAt   DateTime     @map("countdown_ends_at")
+  status            ReportStatus @default(ACTIVE)
+  resolvedAt        DateTime?    @map("resolved_at")
   /// 20% 잔여 경고(10.3) 중복 발송 방지용
-  warningSentAt    DateTime?    @map("warning_sent_at")
+  warningSentAt     DateTime?    @map("warning_sent_at")
   /// 인증샷 미션(자리 복귀) 결과물 — Supabase Storage 오브젝트 경로(공개 URL이 아니다).
   /// 항상 signed URL로만 서빙한다 — private 버킷 + 서비스롤 키로만 접근하므로 URL 자체가
   /// 새어나가도 만료 전 잠깐을 제외하면 열람 불가(F14 익명성 원칙과 동일한 이유로 공개 경로 지양).
-  photoPath        String?      @map("photo_path")
+  photoPath         String?      @map("photo_path")
+  /// 신고 접수 시 랜덤 배정되는 자리 복귀 인증 미션(lib/missions.ts MissionCode). 매번 다르게
+  /// 배정해서 예전 인증샷 재활용을 어렵게 한다.
+  missionCode       String?      @map("mission_code") @db.VarChar(30)
+  /// AI 검증(lib/photo-verification.ts)을 통과한 photoPath. return-from-report는 이 값과
+  /// 정확히 일치하는 photoPath로만 신고를 해제해준다 — 검증 안 거친 photoPath로 우회 방지.
+  verifiedPhotoPath String?      @map("verified_photo_path")
 
-  seatSession   SeatSession     @relation(fields: [seatSessionId], references: [id])
-  reporterUser  User?           @relation("ReporterUser", fields: [reporterUserId], references: [id])
+  seatSession   SeatSession    @relation(fields: [seatSessionId], references: [id])
+  reporterUser  User?          @relation("ReporterUser", fields: [reporterUserId], references: [id])
   notifications Notification[]
   communityPost CommunityPost?
 
@@ -212,12 +218,12 @@ model CheckoutAlarm {
 /// 마이페이지 배지/칭호 시스템 — 조건을 충족하는 순간 lib/badges.ts가 upsert로 부여하고
 /// 이후 조건을 더 이상 만족하지 못해도 유지되는 "업적"이다(게임의 도전과제와 동일한 개념).
 model UserBadge {
-  id          Int      @id @default(autoincrement())
-  userId      Int      @map("user_id")
+  id          Int       @id @default(autoincrement())
+  userId      Int       @map("user_id")
   badgeCode   BadgeCode @map("badge_code")
   /// 월 단위 배지는 "YYYY-MM"(그 달에 한 번만 부여), 전체 기간 배지는 "ALL_TIME"
-  periodLabel String   @map("period_label") @db.VarChar(20)
-  awardedAt   DateTime @default(now()) @map("awarded_at")
+  periodLabel String    @map("period_label") @db.VarChar(20)
+  awardedAt   DateTime  @default(now()) @map("awarded_at")
 
   user User @relation(fields: [userId], references: [id])
 
@@ -236,8 +242,8 @@ model CommunityPost {
   photoPath String   @map("photo_path")
   createdAt DateTime @default(now()) @map("created_at")
 
-  report   Report              @relation(fields: [reportId], references: [id])
-  user     User                @relation(fields: [userId], references: [id])
+  report   Report             @relation(fields: [reportId], references: [id])
+  user     User               @relation(fields: [userId], references: [id])
   comments CommunityComment[]
   likes    CommunityLike[]
 
