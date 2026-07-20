@@ -70,7 +70,11 @@ export function PostCard({
           </button>
         </div>
         {post.isMine && (
-          <button onClick={handleDelete} disabled={deleting} className="text-xs text-danger-muted hover:underline">
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="-m-2 p-2 text-xs text-danger-muted hover:underline"
+          >
             삭제
           </button>
         )}

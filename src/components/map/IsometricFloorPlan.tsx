@@ -26,10 +26,13 @@ export function IsometricFloorPlan({
   zoneSummaries: DashboardZoneSummary[];
 }) {
   return (
-    <div className="relative h-[420px] w-full overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50 sm:h-[560px]">
+    <div className="relative h-[min(60dvh,420px)] w-full overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50 sm:h-[560px]">
       <FloorScene floor={floor} zoneSummaries={zoneSummaries} />
-      <p className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-white/70 px-2 py-0.5 text-[11px] text-neutral-400">
+      <p className="pointer-events-none absolute bottom-2 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded bg-white/70 px-2 py-0.5 text-[11px] text-neutral-400 sm:block">
         드래그: 회전 · 휠: 확대·축소 · 우클릭 드래그: 이동 · 핀 클릭: 구역 좌석 맵으로 이동 (화장실·엘리베이터·비상구 아이콘은 위치 표시용)
+      </p>
+      <p className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-white/70 px-2 py-0.5 text-[10px] text-neutral-400 sm:hidden">
+        한 손가락: 회전 · 두 손가락: 확대·이동 · 핀 클릭: 좌석 맵으로 이동
       </p>
     </div>
   );

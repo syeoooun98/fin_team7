@@ -29,7 +29,7 @@ export function RoomPin({
     <Html position={[geo.centerX, y, geo.centerZ]} center zIndexRange={[10, 0]} occlude={false}>
       <Link
         href={`/map/${zoneCode}`}
-        className="flex cursor-pointer select-none flex-col items-center gap-1"
+        className="flex cursor-pointer select-none flex-col items-center gap-1 p-2"
         aria-label={`${block.label} 좌석 맵으로 이동`}
       >
         <MapPin color={color} available={available} />

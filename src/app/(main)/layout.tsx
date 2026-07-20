@@ -15,7 +15,8 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <NavBar studentId={user?.studentId ?? null} />
       <NotificationToastHost />
       {user && <ReportGateModal />}
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+      {/* pb-24: 640px 미만에서 고정된 하단 탭바(NavBar의 MobileTabBar)에 콘텐츠가 가리지 않도록 여유를 둔다 */}
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 pt-6 pb-24 sm:px-6 sm:py-8">{children}</main>
     </div>
   );
 }
