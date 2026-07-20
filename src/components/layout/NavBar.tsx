@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogoutButton } from "./LogoutButton";
@@ -24,9 +25,13 @@ export function NavBar({ studentId }: { studentId: string | null }) {
     <header className="sticky top-0 z-40 border-b border-border-subtle bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Link href="/" className="flex shrink-0 items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-indigo-400 text-sm font-bold text-white shadow-[0_6px_16px_-6px_rgba(124,58,237,0.6)]">
-            자
-          </span>
+          <Image
+            src="/logo-v2.png"
+            alt="자리지킴이 로고"
+            width={36}
+            height={36}
+            className="h-9 w-9 rounded-xl object-cover shadow-[0_6px_16px_-6px_rgba(124,58,237,0.6)]"
+          />
           <span className="text-base font-bold tracking-tight text-foreground">자리지킴이</span>
         </Link>
 
