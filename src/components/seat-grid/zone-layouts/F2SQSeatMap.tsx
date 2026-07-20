@@ -31,23 +31,28 @@ export function F2SQSeatMap({
   };
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_rgba(124,58,237,0.06)]">
-      <div className="rounded-xl bg-[#FAFAFC] p-8" style={{ minWidth: "1100px" }}>
-        <div className="flex gap-10">
+    <div className="space-y-2">
+      <p className="text-xs text-foreground-muted sm:hidden">
+        두 손가락으로 확대한 뒤 좌석을 눌러주세요. 좌우로 밀어서 전체를 볼 수 있어요.
+      </p>
+      <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_rgba(124,58,237,0.06)]">
+        <div className="rounded-xl bg-[#FAFAFC] p-8" style={{ minWidth: "1100px" }}>
           <div className="flex gap-10">
-            {F2SQ_COLUMNS.slice(0, 3).map((col, i) => (
-              <div key={i} className={`flex flex-col gap-1.5 rounded-full px-1.5 py-1.5 ${STRIP}`}>
-                {col.map(chip)}
-              </div>
-            ))}
-          </div>
-          <div className="w-40" />
-          <div className="flex gap-10">
-            {F2SQ_COLUMNS.slice(3, 6).map((col, i) => (
-              <div key={i} className={`flex flex-col gap-1.5 rounded-full px-1.5 py-1.5 ${STRIP}`}>
-                {col.map(chip)}
-              </div>
-            ))}
+            <div className="flex gap-10">
+              {F2SQ_COLUMNS.slice(0, 3).map((col, i) => (
+                <div key={i} className={`flex flex-col gap-1.5 rounded-full px-1.5 py-1.5 ${STRIP}`}>
+                  {col.map(chip)}
+                </div>
+              ))}
+            </div>
+            <div className="w-40" />
+            <div className="flex gap-10">
+              {F2SQ_COLUMNS.slice(3, 6).map((col, i) => (
+                <div key={i} className={`flex flex-col gap-1.5 rounded-full px-1.5 py-1.5 ${STRIP}`}>
+                  {col.map(chip)}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

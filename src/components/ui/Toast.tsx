@@ -15,10 +15,10 @@ export function Toast({ message, tone = "info", action }: ToastPayload) {
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium shadow-[0_16px_32px_-16px_rgba(43,45,90,0.35)] ${toneClass}`}
+      className={`flex max-w-[calc(100vw-2rem)] items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium shadow-[0_16px_32px_-16px_rgba(43,45,90,0.35)] ${toneClass}`}
       role="status"
     >
-      <span>{message}</span>
+      <span className="min-w-0 break-words">{message}</span>
       {action && (
         <button
           onClick={action.onClick}

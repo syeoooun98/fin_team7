@@ -25,7 +25,7 @@ export function RealSeatChip({
 }) {
   if (!seat) {
     return (
-      <span className="flex h-6 w-9 shrink-0 items-center justify-center rounded-lg border border-dashed border-gray-200 text-[11px] font-semibold text-gray-300">
+      <span className="flex h-7 w-10 shrink-0 items-center justify-center rounded-lg border border-dashed border-gray-200 text-[11px] font-semibold text-gray-300">
         {no}
       </span>
     );
@@ -38,7 +38,7 @@ export function RealSeatChip({
     <button
       onClick={onClick}
       title={`${seat.seatCode} · ${style.label}`}
-      className="relative flex h-6 w-9 shrink-0 items-center justify-center gap-0.5 rounded-lg border text-[11px] font-semibold shadow-sm transition hover:-translate-y-0.5"
+      className="relative flex h-7 w-10 shrink-0 items-center justify-center gap-0.5 rounded-lg border text-[11px] font-semibold shadow-sm transition hover:-translate-y-0.5"
       style={{
         backgroundColor: style.bg,
         borderColor: style.border,
