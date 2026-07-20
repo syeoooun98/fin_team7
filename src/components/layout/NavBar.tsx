@@ -3,13 +3,60 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 import { LogoutButton } from "./LogoutButton";
 
-const NAV_ITEMS = [
-  { href: "/", label: "대시보드" },
-  { href: "/map", label: "좌석 맵" },
-  { href: "/community", label: "커뮤니티" },
-  { href: "/mypage", label: "마이페이지" },
+const NAV_ITEMS: { href: string; label: string; icon: ReactNode }[] = [
+  {
+    href: "/",
+    label: "대시보드",
+    icon: (
+      <path
+        d="M3 10.5 10 4l7 6.5M5 9v7h10V9"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    ),
+  },
+  {
+    href: "/map",
+    label: "좌석 맵",
+    icon: (
+      <path
+        d="M10 17.5s5.5-4.55 5.5-8.5A5.5 5.5 0 1 0 4.5 9c0 3.95 5.5 8.5 5.5 8.5Z M10 11.25a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5Z"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinejoin="round"
+      />
+    ),
+  },
+  {
+    href: "/community",
+    label: "커뮤니티",
+    icon: (
+      <path
+        d="M3.5 15.5V6a1.5 1.5 0 0 1 1.5-1.5h10A1.5 1.5 0 0 1 16.5 6v6a1.5 1.5 0 0 1-1.5 1.5H8l-3.2 2.6a.5.5 0 0 1-.8-.4Z"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinejoin="round"
+      />
+    ),
+  },
+  {
+    href: "/mypage",
+    label: "마이페이지",
+    icon: (
+      <path
+        d="M10 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM4 16.5c.8-3 3-4.5 6-4.5s5.2 1.5 6 4.5"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    ),
+  },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -17,7 +64,12 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** 로그인 여부에 따라 로그인/회원가입 링크 또는 계정 정보+로그아웃을 보여준다. */
+/**
+ * 로그인 여부에 따라 로그인/회원가입 링크 또는 계정 정보+로그아웃을 보여준다.
+ * 640px 미만(design.md 6절 모바일 구간)에서는 상단 바에 4개 메뉴 텍스트를 다 욱여넣으면
+ * 넘쳐서 가로 스크롤이 생기므로, 상단 pill 메뉴는 sm 이상에서만 보여주고 모바일에서는
+ * 같은 4개 목적지를 하단 고정 탭바로 대신 노출한다.
+ */
 export function NavBar({ studentId }: { studentId: string | null }) {
   const pathname = usePathname();
 
@@ -101,10 +153,13 @@ function MobileTabBar({ pathname }: { pathname: string }) {
               className="flex flex-1 flex-col items-center justify-center gap-1 py-2"
             >
               <span
-                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                className={`flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-[11px] font-medium transition ${
                   active ? "bg-brand-soft text-brand" : "text-foreground-muted"
                 }`}
               >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
+                  {item.icon}
+                </svg>
                 {item.label}
               </span>
             </Link>
